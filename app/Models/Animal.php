@@ -20,9 +20,9 @@ class Animal extends Model
         'size',
         'size_en',
         'city',
-        'city_en'
+        'city_en',
         'description',
-        'description_en'
+        'description_en',
     ]; // Поля, які можна масово заповнювати
 
     public function photos()

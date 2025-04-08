@@ -16,9 +16,10 @@ class AnimalController extends Controller
     // Додати нову тварину
     public function store(Request $request)
     {
+        if ($toke != 'srg') throw new Exception('Auth error');
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'name_en' => 'nullable|string|max:255',
+            'name_en' => 'required|string|max:255',
             'gender' => 'required|string|max:50',
             'gender_en' => 'nullable|string|max:50',
             'age' => 'required|integer',
