@@ -26,12 +26,13 @@ return new class extends Migration
         $table->string('gender'); // Стать
         $table->string('gender_en'); // Стать англійською (наприклад: male, female)
         $table->integer('age'); // Вік тварини у тижнях
-        $table->string('size')->nullable(); // Розмір (малий, середній, великий) - необов’язково
-        $table->string('size_en')->nullable(); // Розмір англійською - необов’язково
-        $table->string('city')->nullable(); // Місто, де знаходиться тварина - необов’язково
-        $table->string('city_en')->nullable(); // Місто англійською - необов’язково
-        $table->text('description'); // Опис тварини - необов’язково
-        $table->text('description_en'); // Опис англійською - необов’язково
+        $table->string('size')->nullable(); // Розмір (малий, середній, великий) - необов'язково
+        $table->string('size_en')->nullable(); // Розмір англійською - необов'язково
+        $table->string('city')->nullable(); // Місто, де знаходиться тварина - необов'язково
+        $table->string('city_en')->nullable(); // Місто англійською - необов'язково
+        $table->text('description'); // Опис тварини - необов'язково
+        $table->text('description_en'); // Опис англійською - необов'язково
+        $table->foreignId('shelter_id')->nullable()->constrained('shelter_info')->onDelete('set null'); // Зв'язок з притулком
         $table->timestamps(); // created_at та updated_at
     });
 }

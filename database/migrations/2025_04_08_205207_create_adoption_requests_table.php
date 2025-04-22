@@ -20,7 +20,9 @@ return new class extends Migration
             $table->string('email'); // Електронна пошта
             $table->text('message')->nullable(); // Додаткове повідомлення
             $table->string('city')->nullable(); // місто
-            $table->boolean('is_processed')->default(false); // Чи оброблений запит
+            $table->boolean('is_processed')->default(false); // Чи переглянутий запит
+            $table->boolean('is_archived')->default(false); // Додаємо поле для архівування
+            $table->text('comment')->nullable(); // Коментар адміністратора
             $table->timestamps();
         });
     }

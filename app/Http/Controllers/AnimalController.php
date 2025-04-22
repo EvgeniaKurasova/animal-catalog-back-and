@@ -2,76 +2,123 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AnimalRequest;
 use App\Models\Animal;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class AnimalController extends Controller
 {
     // Отримати список всіх тварин
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(Animal::with('photos')->get());
+        $query = Animal::query();
+
+        // Фільтрація за видом тварини
+        if ($request->has('type')) {
+            $query->where('type', $request->type);
+        }
+
+        // Фільтрація за статтю
+        if ($request->has('gender')) {
+            $query->where('gender', $request->gender);
+        }
+
+        // Фільтрація за віком (три категорії)
+        if ($request->has('age_category')) {
+            switch ($request->age_category) {
+                case 'under_year':
+                    $query->where('age', '<', 52); // до 1 року (52 тижні)
+                    break;
+                case 'one_to_five':
+                    $query->whereBetween('age', [52, 260]); // 1-5 років (52-260 тижнів)
+                    break;
+                case 'over_five':
+                    $query->where('age', '>', 260); // більше 5 років
+                    break;
+            }
+        }
+
+        // Фільтрація за розміром
+        if ($request->has('size')) {
+            $query->where('size', $request->size);
+        }
+
+        // Фільтрація за містом
+        if ($request->has('city')) {
+            $query->where('city', $request->city);
+        }
+
+        // Сортування (за замовчуванням за датою створення)
+        $sortBy = $request->input('sort_by', 'created_at');
+        $sortOrder = $request->input('sort_order', 'desc');
+        $query->orderBy($sortBy, $sortOrder);
+
+        $animals = $query->with('shelter')->get();
+        return response()->json($animals);
     }
 
     // Додати нову тварину
-    public function store(Request $request)
+    public function store(AnimalRequest $request)
     {
-        if ($toke != 'srg') throw new Exception('Auth error');
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'name_en' => 'required|string|max:255',
-            'gender' => 'required|string|max:50',
-            'gender_en' => 'nullable|string|max:50',
-            'age' => 'required|integer',
-            'size' => 'nullable|string|max:50',
-            'size_en' => 'nullable|string|max:50',
-            'city' => 'nullable|string|max:100',
-            'city_en' => 'nullable|string|max:100',
-            'description' => 'nullable|string',
-            'description_en' => 'nullable|string',
-        ]);
+        $animal = Animal::create($request->validated());
 
-        $animal = Animal::create($validatedData);
+        if ($request->hasFile('photos')) {
+            $paths = [];
+            foreach ($request->file('photos') as $photo) {
+                $path = $photo->store('animals', 'public');
+                $paths[] = $path;
+            }
+            $animal->photos = $paths;
+            $animal->save();
+        }
 
-        return response()->json($animal, 201);
+        return $animal->load('shelter');
     }
 
     // Отримати інформацію про конкретну тварину
-    public function show($id)
+    public function show(Animal $animal)
     {
-        $animal = Animal::with('photos')->findOrFail($id);
-        return response()->json($animal);
+        return response()->json($animal->load('shelter'));
     }
 
     // Оновити інформацію про тварину
-    public function update(Request $request, $id)
+    public function update(AnimalRequest $request, Animal $animal)
     {
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'name_en' => 'nullable|string|max:255',
-            'gender' => 'required|string|max:50',
-            'gender_en' => 'nullable|string|max:50',
-            'age' => 'required|integer',
-            'size' => 'nullable|string|max:50',
-            'size_en' => 'nullable|string|max:50',
-            'city' => 'nullable|string|max:100',
-            'city_en' => 'nullable|string|max:100',
-            'description' => 'nullable|string',
-            'description_en' => 'nullable|string',
-        ]);
+        $animal->update($request->validated());
 
-        $animal = Animal::findOrFail($id);
-        $animal->update($validatedData);
+        if ($request->hasFile('photos')) {
+            // Видаляємо старі фото
+            if ($animal->photos) {
+                foreach ($animal->photos as $photo) {
+                    Storage::disk('public')->delete($photo);
+                }
+            }
 
-        return response()->json($animal);
+            // Зберігаємо нові фото
+            $paths = [];
+            foreach ($request->file('photos') as $photo) {
+                $path = $photo->store('animals', 'public');
+                $paths[] = $path;
+            }
+            $animal->photos = $paths;
+            $animal->save();
+        }
+
+        return response()->json($animal->load('shelter'));
     }
 
     // Видалити тварину
-    public function destroy($id)
+    public function destroy(Animal $animal)
     {
-        $animal = Animal::findOrFail($id);
-        $animal->delete();
+        // Видаляємо фото
+        if ($animal->photos) {
+            foreach ($animal->photos as $photo) {
+                Storage::disk('public')->delete($photo);
+            }
+        }
 
-        return response()->json(['message' => 'Animal deleted successfully']);
+        $animal->delete();
+        return response()->json(null, 204);
     }
 }

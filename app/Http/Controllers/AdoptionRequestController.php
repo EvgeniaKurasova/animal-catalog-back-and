@@ -2,19 +2,33 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AdoptionRequest;
+use App\Http\Requests\AdoptionRequest;
+use App\Models\AdoptionRequest as AdoptionRequestModel;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class AdoptionRequestController extends Controller
 {
     /**
-     * Отримати всі запити на усиновлення для адмін-панелі
+     * Отримати всі активні запити на усиновлення для адмін-панелі
      * Повертає список всіх запитів разом з інформацією про тварину
      */
     public function index()
     {
-        $requests = AdoptionRequest::with('animal')->get();
+        $requests = AdoptionRequestModel::with('animal')
+            ->where('is_archived', false)
+            ->get();
+        return response()->json($requests);
+    }
+
+    /**
+     * Отримати архівовані запити
+     */
+    public function archived()
+    {
+        $requests = AdoptionRequestModel::with('animal')
+            ->where('is_archived', true)
+            ->get();
         return response()->json($requests);
     }
 
@@ -22,54 +36,49 @@ class AdoptionRequestController extends Controller
      * Створити новий запит на усиновлення
      * Викликається коли користувач заповнює форму на фронтенді
      */
-    public function store(Request $request)
+    public function store(AdoptionRequest $request)
     {
-        $validated = $request->validate([
-            'animal_id' => 'required|exists:animals,id',
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-            'email' => 'required|email|max:255',
-            'city' => 'nullable|string|max:255', // Змінено на необов'язкове
-            'message' => 'nullable|string'
-        ]);
-
-        $request = AdoptionRequest::create($validated);
-
-        return response()->json($request, Response::HTTP_CREATED);
+        $adoptionRequest = AdoptionRequestModel::create($request->validated());
+        return $adoptionRequest->load('animal');
     }
 
     /**
      * Оновити статус запиту
      * Використовується в адмін-панелі для зміни статусу обробки запиту
      * Адміністратор може:
-     * - Позначити запит як оброблений (is_processed = true)
-     * - Повернути запит в стан "не оброблений" (is_processed = false)
+     * - Позначити запит як переглянутий (is_processed = true)
+     * - Повернути запит в стан "не переглянутий" (is_processed = false)
      */
-    public function update(Request $request, AdoptionRequest $adoptionRequest)
+    public function update(AdoptionRequest $request, AdoptionRequestModel $adoptionRequest)
     {
-        $validated = $request->validate([
-            'is_processed' => 'required|boolean'
-        ]);
-
-        $adoptionRequest->update($validated);
-
-        return response()->json([
-            'message' => $validated['is_processed'] 
-                ? 'Запит позначено як оброблений' 
-                : 'Запит повернуто в стан "не оброблений"',
-            'request' => $adoptionRequest
-        ]);
+        $adoptionRequest->update($request->validated());
+        return $adoptionRequest->load('animal');
     }
 
     /**
-     * Видалити запит
-     * Використовується в адмін-панелі для видалення запитів
+     * Архівувати запит
      */
-    public function destroy(AdoptionRequest $adoptionRequest)
+    public function archive(AdoptionRequestModel $adoptionRequest)
+    {
+        $adoptionRequest->update(['is_archived' => true]);
+        return response()->json(['message' => 'Запит архівовано']);
+    }
+
+    /**
+     * Відновити запит з архіву
+     */
+    public function restore(AdoptionRequestModel $adoptionRequest)
+    {
+        $adoptionRequest->update(['is_archived' => false]);
+        return response()->json(['message' => 'Запит відновлено']);
+    }
+
+    /**
+     * Видалити запит остаточно
+     */
+    public function destroy(AdoptionRequestModel $adoptionRequest)
     {
         $adoptionRequest->delete();
-
         return response()->json(null, Response::HTTP_NO_CONTENT);
     }
 }
