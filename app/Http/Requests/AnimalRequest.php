@@ -27,20 +27,21 @@ class AnimalRequest extends FormRequest
             'type_en' => 'required|string|max:255', // Вид тварини англійською
             'gender' => 'required|string|in:чоловіча,жіноча', // Стать тварини
             'gender_en' => 'required|string|in:male,female', // Стать тварини англійською
-            'age' => 'required|integer|min:0', // Вік тварини
+            'age_years' => 'required|integer|min:0',
+            'age_months' => 'required|integer|min:0|max:11',
 
             // Необов'язкові поля
             'size' => 'nullable|string|in:маленький,середній,великий', // Розмір тварини
             'size_en' => 'nullable|string|in:small,medium,large', // Розмір тварини англійською
             'city' => 'nullable|string|max:255', // Місто
             'city_en' => 'nullable|string|max:255', // Місто англійською
-            'description' => 'nullable|string', // Опис тварини
-            'description_en' => 'nullable|string', // Опис тварини англійською
-            'shelter_id' => 'nullable|exists:shelter_info,id', // ID притулку
+            'additional_information' => 'nullable|string', // Додаткова інформація
+            'additional_information_en' => 'nullable|string', // Додаткова інформація англійською
+            'shelterID' => 'required|exists:shelter_info,shelterID',
 
             // Фото тварини
             'photos' => 'nullable|array', // Масив фото
-            'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:1024' // Кожне фото має бути зображенням, підтримуваних форматів, не більше 1MB на фото
+            'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048' // Кожне фото має бути зображенням, підтримуваних форматів, не більше 2MB на фото
         ];
     }
 
@@ -60,16 +61,21 @@ class AnimalRequest extends FormRequest
                 'type_en.required' => 'Please enter the animal type in English',
                 'gender.required' => 'Please select the animal\'s gender',
                 'gender.in' => 'Invalid gender',
-                'age.required' => 'Please enter the animal\'s age',
-                'age.min' => 'Age cannot be negative',
+                'age_years.required' => 'Please enter the animal\'s age in years',
+                'age_years.min' => 'Age in years cannot be negative',
+                'age_months.required' => 'Please enter the animal\'s age in months',
+                'age_months.min' => 'Age in months cannot be negative',
+                'age_months.max' => 'Age in months cannot exceed 11',
 
                 // Error messages for optional fields
                 'size.in' => 'Invalid size',
+                'shelterID.required' => 'Please select a shelter',
+                'shelterID.exists' => 'Selected shelter does not exist',
 
                 // Error messages for photos
                 'photos.*.image' => 'File must be an image',
                 'photos.*.mimes' => 'Supported formats: jpeg, png, jpg, gif',
-                'photos.*.max' => 'Each image size cannot exceed 1MB'
+                'photos.*.max' => 'Each image size cannot exceed 2MB'
             ];
         }
 
@@ -81,16 +87,21 @@ class AnimalRequest extends FormRequest
             'type_en.required' => 'Будь ласка, введіть вид тварини англійською',
             'gender.required' => 'Будь ласка, виберіть стать тварини',
             'gender.in' => 'Невірна стать тварини',
-            'age.required' => 'Будь ласка, введіть вік тварини',
-            'age.min' => 'Вік не може бути від\'ємним',
+            'age_years.required' => 'Будь ласка, введіть вік тварини в роках',
+            'age_years.min' => 'Вік в роках не може бути від\'ємним',
+            'age_months.required' => 'Будь ласка, введіть вік тварини в місяцях',
+            'age_months.min' => 'Вік в місяцях не може бути від\'ємним',
+            'age_months.max' => 'Вік в місяцях не може перевищувати 11',
 
             // Повідомлення про помилки для необов'язкових полів
             'size.in' => 'Невірний розмір тварини',
+            'shelterID.required' => 'Будь ласка, виберіть притулок',
+            'shelterID.exists' => 'Вибраний притулок не існує',
 
             // Повідомлення про помилки для фото
             'photos.*.image' => 'Файл має бути зображенням',
             'photos.*.mimes' => 'Підтримуються тільки формати: jpeg, png, jpg, gif',
-            'photos.*.max' => 'Розмір кожного зображення не може перевищувати 1MB'
+            'photos.*.max' => 'Розмір кожного зображення не може перевищувати 2MB'
         ];
     }
 } 

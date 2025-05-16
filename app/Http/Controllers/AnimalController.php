@@ -6,6 +6,7 @@ use App\Http\Requests\AnimalRequest;
 use App\Models\Animal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class AnimalController extends Controller
 {
@@ -24,18 +25,37 @@ class AnimalController extends Controller
             $query->where('gender', $request->gender);
         }
 
-        // Фільтрація за віком (три категорії)
+        // Фільтрація за віком
         if ($request->has('age_category')) {
             switch ($request->age_category) {
                 case 'under_year':
-                    $query->where('age', '<', 52); // до 1 року (52 тижні)
+                    $query->where(function($q) {
+                        $q->where('age_years', 0)
+                          ->where('age_months', '<', 12);
+                    });
                     break;
                 case 'one_to_five':
-                    $query->whereBetween('age', [52, 260]); // 1-5 років (52-260 тижнів)
+                    $query->where(function($q) {
+                        $q->where(function($q) {
+                            $q->where('age_years', 1)
+                              ->where('age_months', '>=', 0);
+                        })->orWhere(function($q) {
+                            $q->where('age_years', '>', 1)
+                              ->where('age_years', '<', 5);
+                        });
+                    });
                     break;
                 case 'over_five':
-                    $query->where('age', '>', 260); // більше 5 років
+                    $query->where('age_years', '>=', 5);
                     break;
+            }
+        } else {
+            // Звичайна фільтрація за роками та місяцями
+            if ($request->has('age_years')) {
+                $query->where('age_years', $request->age_years);
+            }
+            if ($request->has('age_months')) {
+                $query->where('age_months', $request->age_months);
             }
         }
 
@@ -55,15 +75,30 @@ class AnimalController extends Controller
         $query->orderBy($sortBy, $sortOrder);
 
         $animals = $query->with('shelter')->get();
+        
+        // Додаємо поточний вік до кожної тварини
+        $animals->transform(function ($animal) {
+            $currentAge = $animal->getCurrentAge();
+            $animal->current_age = $currentAge;
+            return $animal;
+        });
+
         return response()->json($animals);
     }
 
     // Додати нову тварину
     public function store(AnimalRequest $request)
     {
-        $animal = Animal::create($request->validated());
+        $data = $request->validated();
+        $data['age_updated_at'] = Carbon::now();
+        
+        $animal = Animal::create($data);
 
         if ($request->hasFile('photos')) {
+            $request->validate([
+                'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
+            ]);
+
             $paths = [];
             foreach ($request->file('photos') as $photo) {
                 $path = $photo->store('animals', 'public');
@@ -73,25 +108,42 @@ class AnimalController extends Controller
             $animal->save();
         }
 
-        return $animal->load('shelter');
+        $animal->load('shelter');
+        $currentAge = $animal->getCurrentAge();
+        $animal->current_age = $currentAge;
+        
+        return response()->json($animal);
     }
 
     // Отримати інформацію про конкретну тварину
     public function show(Animal $animal)
     {
-        return response()->json($animal->load('shelter'));
+        $animal->load('shelter');
+        $currentAge = $animal->getCurrentAge();
+        $animal->current_age = $currentAge;
+        
+        return response()->json($animal);
     }
 
     // Оновити інформацію про тварину
     public function update(AnimalRequest $request, Animal $animal)
     {
-        $animal->update($request->validated());
+        $data = $request->validated();
+        $data['age_updated_at'] = Carbon::now();
+        
+        $animal->update($data);
 
         if ($request->hasFile('photos')) {
+            $request->validate([
+                'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
+            ]);
+
             // Видаляємо старі фото
             if ($animal->photos) {
                 foreach ($animal->photos as $photo) {
-                    Storage::disk('public')->delete($photo);
+                    if (Storage::disk('public')->exists($photo)) {
+                        Storage::disk('public')->delete($photo);
+                    }
                 }
             }
 
@@ -105,7 +157,11 @@ class AnimalController extends Controller
             $animal->save();
         }
 
-        return response()->json($animal->load('shelter'));
+        $animal->load('shelter');
+        $currentAge = $animal->getCurrentAge();
+        $animal->current_age = $currentAge;
+        
+        return response()->json($animal);
     }
 
     // Видалити тварину
@@ -114,7 +170,9 @@ class AnimalController extends Controller
         // Видаляємо фото
         if ($animal->photos) {
             foreach ($animal->photos as $photo) {
-                Storage::disk('public')->delete($photo);
+                if (Storage::disk('public')->exists($photo)) {
+                    Storage::disk('public')->delete($photo);
+                }
             }
         }
 

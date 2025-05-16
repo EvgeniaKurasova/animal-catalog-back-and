@@ -12,24 +12,25 @@ class AnimalPhotoController extends Controller
     /**
      * Завантаження фото для тварини
      */
-    public function upload(Request $request, $animal_id)
+    public function upload(Request $request, $animalID)
     {
         $request->validate([
-            'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048' // Перевіряємо, що це зображення
+            'photos.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
-        $animal = Animal::findOrFail($animal_id);
+        $animal = Animal::findOrFail($animalID);
 
         $uploadedPhotos = [];
 
         if ($request->hasFile('photos')) {
             foreach ($request->file('photos') as $photo) {
-                $path = $photo->store('animal_photos', 'public'); // Зберігаємо фото
+                $path = $photo->store('animal_photos', 'public');
 
                 // Додаємо запис в БД
                 $animalPhoto = AnimalPhoto::create([
-                    'animal_id' => $animal->id,
-                    'photo_path' => $path
+                    'animalID' => $animal->animalID,
+                    'photo_path' => $path,
+                    'is_main' => false // За замовчуванням фото не є головним
                 ]);
 
                 $uploadedPhotos[] = $animalPhoto;
@@ -42,12 +43,14 @@ class AnimalPhotoController extends Controller
     /**
      * Видалення фото
      */
-    public function delete($id)
+    public function delete($photoID)
     {
-        $photo = AnimalPhoto::findOrFail($id);
+        $photo = AnimalPhoto::findOrFail($photoID);
 
-        // Видаляємо фото з диска
-        Storage::disk('public')->delete($photo->photo_path);
+        // Перевіряємо, чи існує файл перед видаленням
+        if (Storage::disk('public')->exists($photo->photo_path)) {
+            Storage::disk('public')->delete($photo->photo_path);
+        }
 
         // Видаляємо з БД
         $photo->delete();

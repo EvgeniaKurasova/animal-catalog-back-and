@@ -21,7 +21,7 @@ class AdoptionRequest extends FormRequest
     {
         return [
             // Обов'язкові поля
-            'animal_id' => 'required|integer', // ID тварини, яку хочуть усиновити
+            'animal_id' => 'required|integer|exists:animals,animalID', // ID тварини, яку хочуть усиновити
             'name' => 'required|string|max:255', // Ім'я людини, яка хоче усиновити
             'email' => 'required|email|max:255', // Email для зв'язку
             'phone' => 'required|string|max:20', // Телефон для зв'язку
@@ -46,6 +46,8 @@ class AdoptionRequest extends FormRequest
         if ($locale === 'en') {
             return [
                 // Error messages for required fields
+                'animal_id.required' => 'Please select an animal',
+                'animal_id.exists' => 'Selected animal does not exist',
                 'name.required' => 'Please enter your name',
                 'email.required' => 'Please enter your email address',
                 'email.email' => 'Please enter a valid email address',
@@ -56,6 +58,8 @@ class AdoptionRequest extends FormRequest
 
         return [
             // Повідомлення про помилки для обов'язкових полів
+            'animal_id.required' => 'Будь ласка, виберіть тварину',
+            'animal_id.exists' => 'Вибрана тварина не існує',
             'name.required' => 'Будь ласка, введіть ваше ім\'я',
             'email.required' => 'Будь ласка, введіть вашу електронну адресу',
             'email.email' => 'Введіть коректну електронну адресу',

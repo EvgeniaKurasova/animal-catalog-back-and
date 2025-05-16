@@ -12,13 +12,22 @@ class ShelterInfo extends Model
     // Назва таблиці в базі даних
     protected $table = 'shelter_info';
 
+    // Первинний ключ
+    protected $primaryKey = 'shelterID';
+
     // Поля, які можна масово заповнювати
     protected $fillable = [
         'logo',
+        'main_photo',
         'name',
         'name_en',
+        'phone',
+        'email',
         'description',
-        'description_en'
+        'description_en',
+        'facebook',
+        'instagram',
+        'rulesID'
     ];
 
     // Поля, які мають бути приховані при серіалізації
@@ -26,4 +35,10 @@ class ShelterInfo extends Model
         'created_at',
         'updated_at'
     ];
+
+    // Зв'язок з правилами усиновлення
+    public function rules()
+    {
+        return $this->belongsTo(AdoptionRule::class, 'rulesID', 'ruleID');
+    }
 }

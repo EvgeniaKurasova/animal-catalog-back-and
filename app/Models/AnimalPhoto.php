@@ -7,14 +7,21 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AnimalPhoto extends Model
 {
+    protected $table = 'photos';
+
     protected $fillable = [
-        'animal_id',
-        'path',
-        'is_main'
+        'animalID',
+        'photo_path',
+        'is_main',
+    ];
+
+    protected $hidden = [
+        'created_at',
+        'updated_at',
     ];
 
     public function animal(): BelongsTo
     {
-        return $this->belongsTo(Animal::class);
+        return $this->belongsTo(Animal::class, 'animalID', 'animalID');
     }
 }
