@@ -31,6 +31,7 @@ class AnimalRequest extends FormRequest
             'age_months' => 'required|integer|min:0|max:11',
 
             // Необов'язкові поля
+            'is_sterilized' => 'nullable|string|max:255', // Чи стерилізована тварина
             'size' => 'nullable|string|in:маленький,середній,великий', // Розмір тварини
             'size_en' => 'nullable|string|in:small,medium,large', // Розмір тварини англійською
             'city' => 'nullable|string|max:255', // Місто
@@ -68,6 +69,7 @@ class AnimalRequest extends FormRequest
                 'age_months.max' => 'Age in months cannot exceed 11',
 
                 // Error messages for optional fields
+                'is_sterilized.in' => 'Sterilization status must be "так" or "ні"',
                 'size.in' => 'Invalid size',
                 'shelterID.required' => 'Please select a shelter',
                 'shelterID.exists' => 'Selected shelter does not exist',
@@ -94,6 +96,7 @@ class AnimalRequest extends FormRequest
             'age_months.max' => 'Вік в місяцях не може перевищувати 11',
 
             // Повідомлення про помилки для необов'язкових полів
+            'is_sterilized.in' => 'Статус стерилізації має бути "так" або "ні"',
             'size.in' => 'Невірний розмір тварини',
             'shelterID.required' => 'Будь ласка, виберіть притулок',
             'shelterID.exists' => 'Вибраний притулок не існує',

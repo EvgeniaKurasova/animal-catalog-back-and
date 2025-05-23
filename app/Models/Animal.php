@@ -21,6 +21,7 @@ class Animal extends Model
         'type',
         'type_en',
         'gender',
+        'is_sterilized',
         'age_years',
         'age_months',
         'size',

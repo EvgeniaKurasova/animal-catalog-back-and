@@ -21,8 +21,9 @@ class AdoptionRuleRequest extends FormRequest
     {
         return [
             // Обов'язкові поля
-            'rules' => 'required|string', // Правила усиновлення українською
-            'rules_en' => 'required|string' // Правила усиновлення англійською
+            'rules' => 'required|text', // Правила українською
+            'rules_en' => 'required|text', // Правила англійською
+            'order' => 'required|integer|min:0' // Порядок відображення
         ];
     }
 
@@ -36,13 +37,19 @@ class AdoptionRuleRequest extends FormRequest
         if ($locale === 'en') {
             return [
                 'rules.required' => 'Please enter the adoption rules',
-                'rules_en.required' => 'Please enter the adoption rules in English'
+                'rules_en.required' => 'Please enter the adoption rules in English',
+                'order.required' => 'Please enter the display order',
+                'order.integer' => 'Order must be a number',
+                'order.min' => 'Order cannot be negative'
             ];
         }
 
         return [
             'rules.required' => 'Будь ласка, введіть правила усиновлення',
-            'rules_en.required' => 'Будь ласка, введіть правила усиновлення англійською'
+            'rules_en.required' => 'Будь ласка, введіть правила усиновлення англійською',
+            'order.required' => 'Будь ласка, введіть порядок відображення',
+            'order.integer' => 'Порядок має бути числом',
+            'order.min' => 'Порядок не може бути від\'ємним'
         ];
     }
 } 

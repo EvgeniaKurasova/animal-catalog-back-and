@@ -7,6 +7,8 @@ use App\Models\Animal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
+use App\Services\LoggingService;
+use App\Services\CacheService;
 
 class AnimalController extends Controller
 {
@@ -112,6 +114,9 @@ class AnimalController extends Controller
         $currentAge = $animal->getCurrentAge();
         $animal->current_age = $currentAge;
         
+        LoggingService::logAnimalAction('created', $animal->toArray());
+        CacheService::clearAnimalCache();
+
         return response()->json($animal);
     }
 
@@ -161,6 +166,9 @@ class AnimalController extends Controller
         $currentAge = $animal->getCurrentAge();
         $animal->current_age = $currentAge;
         
+        LoggingService::logAnimalAction('updated', $animal->toArray());
+        CacheService::clearAnimalCache();
+
         return response()->json($animal);
     }
 
@@ -177,6 +185,9 @@ class AnimalController extends Controller
         }
 
         $animal->delete();
+        LoggingService::logAnimalAction('deleted', $animal->toArray());
+        CacheService::clearAnimalCache();
+
         return response()->json(null, 204);
     }
 }

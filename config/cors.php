@@ -2,11 +2,8 @@
 
 return [
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
-    'allowed_methods' => ['*'],
+    'allowed_methods' => ['*'],  // Дозволяємо всі методи
     'allowed_origins' => [env('FRONTEND_URL', 'http://localhost:3000')],
-    'allowed_origins_patterns' => [],
-    'allowed_headers' => ['*'],
-    'exposed_headers' => [],
-    'max_age' => 0,
+    'allowed_headers' => ['*'],  // Дозволяємо всі заголовки
     'supports_credentials' => true,
 ]; 

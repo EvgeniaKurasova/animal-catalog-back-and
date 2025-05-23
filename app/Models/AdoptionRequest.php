@@ -25,12 +25,22 @@ class AdoptionRequest extends Model
         'is_processed',
         'is_archived',
         'comment',
+        'user_id',
+        'animal_id',
+        'animal_name',
+        'status',
+        'is_viewed',
+        'created_at'
     ];
 
-    // Поля, які мають бути приховані при серіалізації
+    // Якщо потрібно приховати тільки updated_at:
     protected $hidden = [
-        'created_at',
         'updated_at'
+    ];
+
+    protected $casts = [
+        'is_viewed' => 'boolean',
+        'created_at' => 'datetime'
     ];
 
     // Зв'язок з твариною

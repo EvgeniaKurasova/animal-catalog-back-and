@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Animal;
 use App\Models\AnimalPhoto;
+use App\Services\LoggingService;
 use Illuminate\Support\Facades\Storage;
 
 class AnimalPhotoController extends Controller
@@ -37,7 +38,34 @@ class AnimalPhotoController extends Controller
             }
         }
 
+        LoggingService::logError('Animal photos uploaded', [
+            'animalID' => $animalID,
+            'photos_count' => count($uploadedPhotos)
+        ]);
+
         return response()->json(['message' => 'Photos uploaded successfully', 'photos' => $uploadedPhotos]);
+    }
+
+    /**
+     * Встановлення головного фото
+     */
+    public function setMainPhoto($photoID)
+    {
+        $photo = AnimalPhoto::findOrFail($photoID);
+        
+        // Скидаємо всі фото цієї тварини як не головні
+        AnimalPhoto::where('animalID', $photo->animalID)
+            ->update(['is_main' => false]);
+        
+        // Встановлюємо нове головне фото
+        $photo->update(['is_main' => true]);
+
+        LoggingService::logError('Main photo set', [
+            'photoID' => $photoID,
+            'animalID' => $photo->animalID
+        ]);
+
+        return response()->json(['message' => 'Main photo updated successfully']);
     }
 
     /**
@@ -51,6 +79,11 @@ class AnimalPhotoController extends Controller
         if (Storage::disk('public')->exists($photo->photo_path)) {
             Storage::disk('public')->delete($photo->photo_path);
         }
+
+        LoggingService::logError('Animal photo deleted', [
+            'photoID' => $photoID,
+            'animalID' => $photo->animalID
+        ]);
 
         // Видаляємо з БД
         $photo->delete();

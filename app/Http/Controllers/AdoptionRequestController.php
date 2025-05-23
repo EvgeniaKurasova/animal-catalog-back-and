@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\AdoptionRequest;
-use App\Models\AdoptionRequest as AdoptionRequestModel;
+use App\Http\Requests\AdoptionRequest as AdoptionRequestForm;
+use App\Models\AdoptionRequest;
+use App\Models\Animal;
+use App\Services\LoggingService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -15,9 +17,10 @@ class AdoptionRequestController extends Controller
      */
     public function index()
     {
-        $requests = AdoptionRequestModel::with('animal')
-            ->where('is_archived', false)
+        $requests = AdoptionRequest::with(['user', 'animal'])
+            ->orderBy('created_at', 'desc')
             ->get();
+
         return response()->json($requests);
     }
 
@@ -26,7 +29,7 @@ class AdoptionRequestController extends Controller
      */
     public function archived()
     {
-        $requests = AdoptionRequestModel::with('animal')
+        $requests = AdoptionRequest::with('animal')
             ->where('is_archived', true)
             ->get();
         return response()->json($requests);
@@ -36,10 +39,35 @@ class AdoptionRequestController extends Controller
      * Створити новий запит на усиновлення
      * Викликається коли користувач заповнює форму на фронтенді
      */
-    public function store(AdoptionRequest $request)
+    public function store(AdoptionRequestForm $request)
     {
-        $adoptionRequest = AdoptionRequestModel::create($request->validated());
-        return $adoptionRequest->load('animal');
+        $animal = Animal::findOrFail($request->animal_id);
+        
+        $adoptionRequest = AdoptionRequest::create([
+            // Обов'язкові поля
+            'user_id' => auth()->id(),
+            'animal_id' => $request->animal_id,
+            'animal_name' => $animal->name,
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'phone' => $request->phone,
+            'email' => $request->email,
+            'city' => $request->city,
+            'message' => $request->message,
+            
+            // Поля зі значеннями за замовчуванням
+            'status' => 'pending',
+            'is_viewed' => false,
+            'is_processed' => false,
+            'is_archived' => false,
+            
+            // Поля, які заповнюються автоматично
+            'created_at' => now()
+        ]);
+
+        LoggingService::logAdoptionRequest('created', $adoptionRequest->toArray());
+
+        return response()->json($adoptionRequest, 201);
     }
 
     /**
@@ -49,16 +77,22 @@ class AdoptionRequestController extends Controller
      * - Позначити запит як переглянутий (is_processed = true)
      * - Повернути запит в стан "не переглянутий" (is_processed = false)
      */
-    public function update(AdoptionRequest $request, AdoptionRequestModel $adoptionRequest)
+    public function update(Request $request, AdoptionRequest $adoptionRequest)
     {
-        $adoptionRequest->update($request->validated());
-        return $adoptionRequest->load('animal');
+        $adoptionRequest->update([
+            'status' => $request->status,
+            'is_viewed' => true
+        ]);
+
+        LoggingService::logAdoptionRequest('updated', $adoptionRequest->toArray());
+
+        return response()->json($adoptionRequest);
     }
 
     /**
      * Архівувати запит
      */
-    public function archive(AdoptionRequestModel $adoptionRequest)
+    public function archive(AdoptionRequest $adoptionRequest)
     {
         $adoptionRequest->update(['is_archived' => true]);
         return response()->json(['message' => 'Запит архівовано']);
@@ -67,7 +101,7 @@ class AdoptionRequestController extends Controller
     /**
      * Відновити запит з архіву
      */
-    public function restore(AdoptionRequestModel $adoptionRequest)
+    public function restore(AdoptionRequest $adoptionRequest)
     {
         $adoptionRequest->update(['is_archived' => false]);
         return response()->json(['message' => 'Запит відновлено']);
@@ -76,9 +110,20 @@ class AdoptionRequestController extends Controller
     /**
      * Видалити запит остаточно
      */
-    public function destroy(AdoptionRequestModel $adoptionRequest)
+    public function destroy(AdoptionRequest $adoptionRequest)
     {
         $adoptionRequest->delete();
         return response()->json(null, Response::HTTP_NO_CONTENT);
+    }
+
+    public function show(AdoptionRequest $adoptionRequest)
+    {
+        return response()->json($adoptionRequest->load(['user', 'animal']));
+    }
+
+    public function markAsViewed(AdoptionRequest $adoptionRequest)
+    {
+        $adoptionRequest->update(['is_viewed' => true]);
+        return response()->json(['message' => 'Запит позначено як переглянутий']);
     }
 }

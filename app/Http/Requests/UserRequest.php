@@ -22,13 +22,15 @@ class UserRequest extends FormRequest
         return [
             // Обов'язкові поля
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email,' . ($this->user ? $this->user->id : 'NULL') . ',id',
+            'lastname' => 'required|string|max:255',
+            'phone_number' => 'required|string|max:20',
+            'gmail' => 'required|email|max:255|unique:users,gmail,' . ($this->user ? $this->user->userID : 'NULL') . ',userID',
             'password' => $this->isMethod('POST') ? 'required|min:8' : 'nullable|min:8',
-            'role' => 'required|in:admin,user',
+            'isAdmin' => 'required|boolean',
 
             // Необов'язкові поля
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string|max:255'
+            'code' => 'nullable|string|max:255',
+            'gmail_verified_at' => 'nullable|date'
         ];
     }
 
@@ -42,25 +44,31 @@ class UserRequest extends FormRequest
         if ($locale === 'en') {
             return [
                 'name.required' => 'Please enter your name',
-                'email.required' => 'Please enter your email address',
-                'email.email' => 'Please enter a valid email address',
-                'email.unique' => 'This email address is already registered',
+                'lastname.required' => 'Please enter your last name',
+                'phone_number.required' => 'Please enter your phone number',
+                'gmail.required' => 'Please enter your email address',
+                'gmail.email' => 'Please enter a valid email address',
+                'gmail.unique' => 'This email address is already registered',
                 'password.required' => 'Please enter a password',
                 'password.min' => 'Password must be at least 8 characters long',
-                'role.required' => 'Please select a role',
-                'role.in' => 'Invalid role selected'
+                'isAdmin.required' => 'Please specify if user is admin',
+                'isAdmin.boolean' => 'Admin status must be true or false',
+                'gmail_verified_at.date' => 'Invalid verification date format'
             ];
         }
 
         return [
             'name.required' => 'Будь ласка, введіть ваше ім\'я',
-            'email.required' => 'Будь ласка, введіть вашу електронну адресу',
-            'email.email' => 'Введіть коректну електронну адресу',
-            'email.unique' => 'Ця електронна адреса вже зареєстрована',
+            'lastname.required' => 'Будь ласка, введіть ваше прізвище',
+            'phone_number.required' => 'Будь ласка, введіть ваш номер телефону',
+            'gmail.required' => 'Будь ласка, введіть вашу електронну адресу',
+            'gmail.email' => 'Введіть коректну електронну адресу',
+            'gmail.unique' => 'Ця електронна адреса вже зареєстрована',
             'password.required' => 'Будь ласка, введіть пароль',
             'password.min' => 'Пароль має містити мінімум 8 символів',
-            'role.required' => 'Будь ласка, виберіть роль',
-            'role.in' => 'Невірна роль'
+            'isAdmin.required' => 'Будь ласка, вкажіть чи користувач є адміністратором',
+            'isAdmin.boolean' => 'Статус адміністратора має бути true або false',
+            'gmail_verified_at.date' => 'Невірний формат дати верифікації'
         ];
     }
 } 

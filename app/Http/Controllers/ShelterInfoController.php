@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\ShelterInfo;
 use App\Http\Requests\ShelterInfoRequest;
+use App\Services\LoggingService;
+use App\Services\CacheService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
@@ -16,7 +18,7 @@ class ShelterInfoController extends Controller
      */
     public function show(): JsonResponse
     {
-        $shelterInfo = ShelterInfo::first();
+        $shelterInfo = CacheService::getShelterInfo();
         
         if (!$shelterInfo) {
             return response()->json(['message' => 'Інформацію про притулок не знайдено'], 404);
@@ -59,6 +61,9 @@ class ShelterInfoController extends Controller
         }
 
         $shelterInfo = ShelterInfo::create($data);
+        
+        LoggingService::logError('Shelter info created', $shelterInfo->toArray());
+        CacheService::clearShelterInfoCache();
 
         return response()->json($shelterInfo, Response::HTTP_CREATED);
     }
@@ -109,6 +114,9 @@ class ShelterInfoController extends Controller
         $shelterInfo->fill($data);
         $shelterInfo->save();
 
+        LoggingService::logError('Shelter info updated', $shelterInfo->toArray());
+        CacheService::clearShelterInfoCache();
+
         return response()->json($shelterInfo);
     }
 
@@ -124,6 +132,9 @@ class ShelterInfoController extends Controller
         if ($shelterInfo->main_photo && Storage::disk('public')->exists($shelterInfo->main_photo)) {
             Storage::disk('public')->delete($shelterInfo->main_photo);
         }
+
+        LoggingService::logError('Shelter info deleted', $shelterInfo->toArray());
+        CacheService::clearShelterInfoCache();
 
         $shelterInfo->delete();
         return response()->json(null, Response::HTTP_NO_CONTENT);
