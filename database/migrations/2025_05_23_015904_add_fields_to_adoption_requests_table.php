@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('adoption_requests', function (Blueprint $table) {
             $table->boolean('is_viewed')->default(false)->after('comment');
-            $table->string('animal_name')->after('animalID');
+            $table->string('animal_name')->after('animal_id');
         });
     }
 

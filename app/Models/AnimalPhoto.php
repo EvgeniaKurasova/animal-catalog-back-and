@@ -10,7 +10,7 @@ class AnimalPhoto extends Model
     protected $table = 'photos';
 
     protected $fillable = [
-        'animalID',
+        'animal_id',
         'photo_path',
         'is_main',
     ];
@@ -22,6 +22,7 @@ class AnimalPhoto extends Model
 
     public function animal(): BelongsTo
     {
-        return $this->belongsTo(Animal::class, 'animalID', 'animalID');
+        // return $this->belongsTo(Animal::class, 'animal_id', 'animal_id');
+        return $this->belongsTo(Animal::class, 'animal_id');
     }
 }

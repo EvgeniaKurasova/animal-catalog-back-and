@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use App\Services\LoggingService;
 use App\Services\CacheService;
+use App\Models\AnimalPhoto; // Додано для роботи з фото
+
 
 class AnimalController extends Controller
 {
@@ -76,118 +78,170 @@ class AnimalController extends Controller
         $sortOrder = $request->input('sort_order', 'desc');
         $query->orderBy($sortBy, $sortOrder);
 
-        $animals = $query->with('shelter')->get();
-        
+        $animals = $query->with('photos')->get();
+
+
         // Додаємо поточний вік до кожної тварини
-        $animals->transform(function ($animal) {
-            $currentAge = $animal->getCurrentAge();
-            $animal->current_age = $currentAge;
+        $animals = $animals->map(function ($animal) {
+            $animal->current_age = $animal->getCurrentAge();
             return $animal;
         });
 
-        return response()->json($animals);
+        // Завжди повертаємо масив (навіть якщо порожній)
+        return response()->json($animals->values());
     }
 
     // Додати нову тварину
     public function store(AnimalRequest $request)
-    {
-        $data = $request->validated();
-        $data['age_updated_at'] = Carbon::now();
-        
-        $animal = Animal::create($data);
+{
+    $data = $request->validated();
+    $data['age_updated_at'] = Carbon::now();
 
-        if ($request->hasFile('photos')) {
-            $request->validate([
-                'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
-            ]);
+    $animal = Animal::create($data);
 
-            $paths = [];
-            foreach ($request->file('photos') as $photo) {
-                $path = $photo->store('animals', 'public');
-                $paths[] = $path;
+    // Завантаження фото
+    if ($request->hasFile('photos')) {
+        $request->validate([
+            'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
+        ]);
+
+        $photosData = $request->input('photos_data', []); // масив із is_main
+        $files = $request->file('photos');
+
+        $mainSet = false;
+
+        foreach ($files as $index => $photo) {
+            $path = $photo->store('animals', 'public');
+
+            $isMain = false;
+            if (isset($photosData[$index]['is_main'])) {
+                $isMain = filter_var($photosData[$index]['is_main'], FILTER_VALIDATE_BOOLEAN);
             }
-            $animal->photos = $paths;
-            $animal->save();
+
+            if ($isMain) $mainSet = true;
+
+            AnimalPhoto::create([
+                'animal_id' => $animal->id,
+                'photo_path' => $path,
+                'is_main' => $isMain,
+            ]);
         }
 
-        $animal->load('shelter');
-        $currentAge = $animal->getCurrentAge();
-        $animal->current_age = $currentAge;
-        
-        LoggingService::logAnimalAction('created', $animal->toArray());
-        CacheService::clearAnimalCache();
-
-        return response()->json($animal);
+        // Якщо не було вибрано головного фото — призначити перше
+        if (!$mainSet && count($files) > 0) {
+            $firstPhoto = AnimalPhoto::where('animal_id', $animal->id)->first();
+            if ($firstPhoto) {
+                $firstPhoto->is_main = true;
+                $firstPhoto->save();
+            }
+        }
     }
+
+    $animal->current_age = $animal->getCurrentAge();
+
+    LoggingService::logAnimalAction('created', $animal->toArray());
+    CacheService::clearAnimalCache();
+
+    return response()->json($animal->load('photos', 'mainPhoto'));
+}
 
     // Отримати інформацію про конкретну тварину
     public function show(Animal $animal)
     {
-        $animal->load('shelter');
-        $currentAge = $animal->getCurrentAge();
-        $animal->current_age = $currentAge;
+        // $animal->load('shelter');
+        // $currentAge = $animal->getCurrentAge();
+        // $animal->current_age = $currentAge;
         
+        // return response()->json($animal);
+        $animal->load('photos', 'mainPhoto');
+        $animal->current_age = $animal->getCurrentAge();
+
         return response()->json($animal);
+
     }
 
     // Оновити інформацію про тварину
     public function update(AnimalRequest $request, Animal $animal)
-    {
-        $data = $request->validated();
-        $data['age_updated_at'] = Carbon::now();
-        
-        $animal->update($data);
+{
+    $data = $request->validated();
+    $data['age_updated_at'] = Carbon::now();
 
-        if ($request->hasFile('photos')) {
-            $request->validate([
-                'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
-            ]);
+    $animal->update($data);
 
-            // Видаляємо старі фото
-            if ($animal->photos) {
-                foreach ($animal->photos as $photo) {
-                    if (Storage::disk('public')->exists($photo)) {
-                        Storage::disk('public')->delete($photo);
-                    }
-                }
+    if ($request->hasFile('photos')) {
+        $request->validate([
+            'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
+        ]);
+
+        $photosData = $request->input('photos_data', []);
+        $files = $request->file('photos');
+
+        // Видаляємо старі фото з диску та БД
+        foreach ($animal->photos as $oldPhoto) {
+            if (Storage::disk('public')->exists($oldPhoto->photo_path)) {
+                Storage::disk('public')->delete($oldPhoto->photo_path);
             }
-
-            // Зберігаємо нові фото
-            $paths = [];
-            foreach ($request->file('photos') as $photo) {
-                $path = $photo->store('animals', 'public');
-                $paths[] = $path;
-            }
-            $animal->photos = $paths;
-            $animal->save();
+            $oldPhoto->delete();
         }
 
-        $animal->load('shelter');
-        $currentAge = $animal->getCurrentAge();
-        $animal->current_age = $currentAge;
-        
-        LoggingService::logAnimalAction('updated', $animal->toArray());
-        CacheService::clearAnimalCache();
+        $mainSet = false;
 
-        return response()->json($animal);
+        // Додаємо нові фото
+        foreach ($files as $index => $photo) {
+            $path = $photo->store('animals', 'public');
+
+            $isMain = false;
+            if (isset($photosData[$index]['is_main'])) {
+                $isMain = filter_var($photosData[$index]['is_main'], FILTER_VALIDATE_BOOLEAN);
+            }
+
+            if ($isMain) $mainSet = true;
+
+            AnimalPhoto::create([
+                'animal_id' => $animal->id,
+                'photo_path' => $path,
+                'is_main' => $isMain,
+            ]);
+        }
+
+        // Якщо не вибрано головного фото — зробити перше
+        if (!$mainSet && count($files) > 0) {
+            $firstPhoto = AnimalPhoto::where('animal_id', $animal->id)->first();
+            if ($firstPhoto) {
+                $firstPhoto->is_main = true;
+                $firstPhoto->save();
+            }
+        }
     }
+
+    $animal->current_age = $animal->getCurrentAge();
+
+    LoggingService::logAnimalAction('updated', $animal->toArray());
+    CacheService::clearAnimalCache();
+
+    // return response()->json($animal->load('photos', 'mainPhoto'));
+    return response()->json(
+        $animal->fresh()->load('photos', 'mainPhoto')
+    );
+    
+}
 
     // Видалити тварину
     public function destroy(Animal $animal)
-    {
-        // Видаляємо фото
-        if ($animal->photos) {
-            foreach ($animal->photos as $photo) {
-                if (Storage::disk('public')->exists($photo)) {
-                    Storage::disk('public')->delete($photo);
-                }
-            }
+{
+    foreach ($animal->photos as $photo) {
+        if (Storage::disk('public')->exists($photo->photo_path)) {
+            Storage::disk('public')->delete($photo->photo_path);
         }
-
-        $animal->delete();
-        LoggingService::logAnimalAction('deleted', $animal->toArray());
-        CacheService::clearAnimalCache();
-
-        return response()->json(null, 204);
+        $photo->delete();
     }
+
+    $animal->delete();
+
+    LoggingService::logAnimalAction('deleted', $animal->toArray());
+    CacheService::clearAnimalCache();
+
+    return response()->json(null, 204);
+}
+
 }

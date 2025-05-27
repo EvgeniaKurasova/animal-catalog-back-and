@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('animals', function (Blueprint $table) {
-            $table->id('animalID');
+            $table->id('animal_id');
             $table->string('name');
             $table->string('name_en');
             $table->string('type');
@@ -25,10 +25,7 @@ return new class extends Migration
             $table->timestamp('age_updated_at');
             $table->text('additional_information')->nullable();
             $table->text('additional_information_en')->nullable();
-            $table->unsignedBigInteger('shelterID');
             $table->timestamps();
-
-            $table->foreign('shelterID')->references('shelterID')->on('shelter_info')->onDelete('cascade');
         });
     }
 

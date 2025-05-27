@@ -24,7 +24,7 @@ class ShelterInfoRequest extends FormRequest
             'name' => 'required|string|max:255', // Назва притулку українською
             'name_en' => 'required|string|max:255', // Назва притулку англійською
             'phone' => 'required|string|max:20', // Телефон притулку
-            'gmail' => 'required|email|max:255', // Email притулку
+            'email' => 'required|email|max:255', // Email притулку
             'description' => 'required|text', // Опис притулку українською
             'description_en' => 'required|text', // Опис притулку англійською
             'main_photo' => 'required|string|max:255', // Головне фото для сторінки
@@ -60,8 +60,8 @@ class ShelterInfoRequest extends FormRequest
                 'name.required' => 'Please enter the shelter name',
                 'name_en.required' => 'Please enter the shelter name in English',
                 'phone.required' => 'Please enter the shelter phone number',
-                'gmail.required' => 'Please enter the shelter email address',
-                'gmail.email' => 'Please enter a valid email address',
+                'email.required' => 'Please enter the shelter email address',
+                'email.email' => 'Please enter a valid email address',
                 'description.required' => 'Please enter the shelter description',
                 'description_en.required' => 'Please enter the shelter description in English',
                 'main_photo.required' => 'Please provide a main photo for the page',
@@ -79,8 +79,8 @@ class ShelterInfoRequest extends FormRequest
             'name.required' => 'Будь ласка, введіть назву притулку',
             'name_en.required' => 'Будь ласка, введіть назву притулку англійською',
             'phone.required' => 'Будь ласка, введіть номер телефону притулку',
-            'gmail.required' => 'Будь ласка, введіть електронну адресу притулку',
-            'gmail.email' => 'Введіть коректну електронну адресу',
+            'email.required' => 'Будь ласка, введіть електронну адресу притулку',
+            'email.email' => 'Введіть коректну електронну адресу',
             'description.required' => 'Будь ласка, введіть опис притулку',
             'description_en.required' => 'Будь ласка, введіть опис притулку англійською',
             'main_photo.required' => 'Будь ласка, вкажіть головне фото для сторінки',

@@ -8,12 +8,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Carbon\Carbon;
+use App\Enums\AnimalGender;
 
 class Animal extends Model
 {
     use HasFactory;
 
     protected $table = 'animals'; // Вказуємо назву таблиці
+    protected $appends = ['main_photo_url'];
 
     protected $fillable = [
         'name',
@@ -29,17 +31,11 @@ class Animal extends Model
         'age_updated_at',
         'additional_information',
         'additional_information_en',
-        'shelterID',
     ]; // Поля, які можна масово заповнювати
 
     protected $casts = [
         'age_updated_at' => 'datetime',
     ];
-
-    public function shelter(): BelongsTo
-    {
-        return $this->belongsTo(ShelterInfo::class, 'shelterID', 'shelterID');
-    }
 
     public function photos(): HasMany
     {
@@ -70,4 +66,9 @@ class Animal extends Model
             'age_months' => (int)$months
         ];
     }
+    public function getMainPhotoUrlAttribute()
+{
+    return $this->mainPhoto ? asset('storage/' . $this->mainPhoto->photo_path) : null;
+}
+
 }

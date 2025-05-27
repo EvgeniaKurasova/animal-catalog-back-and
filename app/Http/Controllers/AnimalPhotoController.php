@@ -77,7 +77,7 @@ class AnimalPhotoController extends Controller
 
         // Перевіряємо, чи існує файл перед видаленням
         if (Storage::disk('public')->exists($photo->photo_path)) {
-            Storage::disk('public')->delete($photo->photo_path);
+        Storage::disk('public')->delete($photo->photo_path);
         }
 
         LoggingService::logError('Animal photo deleted', [

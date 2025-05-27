@@ -25,7 +25,7 @@ class EnsureUserIsAdmin
         }
 
         // Перевіряємо, чи користувач є адміністратором
-        if (!$request->user()->is_admin) {
+        if (!$request->user()->isAdmin) {
             return response()->json([
                 'message' => 'Доступ заборонено. Потрібні права адміністратора.'
             ], 403);

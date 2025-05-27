@@ -12,13 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('user_tokens', function (Blueprint $table) {
-            $table->id('tokenID');
-            $table->unsignedBigInteger('userID');
+            $table->id('token_id');
+            $table->unsignedBigInteger('user_id');
             $table->string('token');
             $table->timestamp('expiredAt');
             $table->timestamps();
 
-            $table->foreign('userID')->references('userID')->on('users')->onDelete('cascade');
+            $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
         });
     }
 

@@ -28,9 +28,9 @@ class AdoptionRequest extends Model
         'user_id',
         'animal_id',
         'animal_name',
-        'status',
         'is_viewed',
         'created_at'
+    
     ];
 
     // Якщо потрібно приховати тільки updated_at:

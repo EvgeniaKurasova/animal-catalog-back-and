@@ -20,25 +20,20 @@ class AnimalRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // Обов'язкові поля
+
             'name' => 'required|string|max:255', // Ім'я тварини українською
             'name_en' => 'required|string|max:255', // Ім'я тварини англійською
             'type' => 'required|string|max:255', // Вид тварини українською
             'type_en' => 'required|string|max:255', // Вид тварини англійською
             'gender' => 'required|string|in:чоловіча,жіноча', // Стать тварини
-            'gender_en' => 'required|string|in:male,female', // Стать тварини англійською
             'age_years' => 'required|integer|min:0',
             'age_months' => 'required|integer|min:0|max:11',
 
-            // Необов'язкові поля
             'is_sterilized' => 'nullable|string|max:255', // Чи стерилізована тварина
             'size' => 'nullable|string|in:маленький,середній,великий', // Розмір тварини
             'size_en' => 'nullable|string|in:small,medium,large', // Розмір тварини англійською
-            'city' => 'nullable|string|max:255', // Місто
-            'city_en' => 'nullable|string|max:255', // Місто англійською
             'additional_information' => 'nullable|string', // Додаткова інформація
             'additional_information_en' => 'nullable|string', // Додаткова інформація англійською
-            'shelterID' => 'required|exists:shelter_info,shelterID',
 
             // Фото тварини
             'photos' => 'nullable|array', // Масив фото
@@ -71,8 +66,6 @@ class AnimalRequest extends FormRequest
                 // Error messages for optional fields
                 'is_sterilized.in' => 'Sterilization status must be "так" or "ні"',
                 'size.in' => 'Invalid size',
-                'shelterID.required' => 'Please select a shelter',
-                'shelterID.exists' => 'Selected shelter does not exist',
 
                 // Error messages for photos
                 'photos.*.image' => 'File must be an image',
@@ -98,8 +91,6 @@ class AnimalRequest extends FormRequest
             // Повідомлення про помилки для необов'язкових полів
             'is_sterilized.in' => 'Статус стерилізації має бути "так" або "ні"',
             'size.in' => 'Невірний розмір тварини',
-            'shelterID.required' => 'Будь ласка, виберіть притулок',
-            'shelterID.exists' => 'Вибраний притулок не існує',
 
             // Повідомлення про помилки для фото
             'photos.*.image' => 'Файл має бути зображенням',

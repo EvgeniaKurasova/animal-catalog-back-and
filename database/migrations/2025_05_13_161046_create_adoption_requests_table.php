@@ -12,13 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('adoption_requests', function (Blueprint $table) {
-            $table->id('requestID');
-            $table->unsignedBigInteger('animalID');
-            $table->unsignedBigInteger('userID');
+            $table->id('request_id');
+            $table->unsignedBigInteger('animal_id');
+            $table->unsignedBigInteger('user_id');
             $table->string('first_name');
             $table->string('last_name');
             $table->string('phone');
-            $table->string('gmail');
+            $table->string('email');
             $table->text('message')->nullable();
             $table->string('city')->nullable();
             $table->boolean('is_processed')->default(false);
@@ -26,8 +26,8 @@ return new class extends Migration
             $table->text('comment')->nullable();
             $table->timestamps();
 
-            $table->foreign('animalID')->references('animalID')->on('animals')->onDelete('cascade');
-            $table->foreign('userID')->references('userID')->on('users')->onDelete('cascade');
+            $table->foreign('animal_id')->references('animal_id')->on('animals')->onDelete('cascade');
+            $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
         });
     }
 

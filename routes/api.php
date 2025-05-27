@@ -26,16 +26,14 @@ Route::middleware('throttle:60,1')->group(function () {
     // Маршрути автентифікації
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
-
-    // Маршрути для відновлення паролю
     Route::post('/forgot-password', [PasswordResetController::class, 'forgotPassword']);
     Route::post('/reset-password', [PasswordResetController::class, 'resetPassword']);
 
     // Публічні маршрути
-    Route::get('/animals', [AnimalController::class, 'index']); // Отримати список тварин
-    Route::get('/animals/{id}', [AnimalController::class, 'show']); // Отримати конкретну тварину
-    Route::get('/shelter-info', [ShelterInfoController::class, 'index']); // Отримати інформацію про притулок
-    Route::get('/rules', [AdoptionRuleController::class, 'index']); // Отримати всі правила
+    Route::get('/animals', [AnimalController::class, 'index']);
+    Route::get('/animals/{id}', [AnimalController::class, 'show']);
+    Route::get('/shelter-info', [ShelterInfoController::class, 'index']);
+    Route::get('/rules', [AdoptionRuleController::class, 'index']);
 
     // Захищені маршрути (потребують автентифікації)
     Route::middleware('auth:sanctum')->group(function () {
@@ -46,6 +44,11 @@ Route::middleware('throttle:60,1')->group(function () {
 
         // Маршрути для заявок на усиновлення
         Route::post('/adoption-requests', [AdoptionRequestController::class, 'store']);
+        Route::get('/adoption-requests/{id}', [AdoptionRequestController::class, 'show']);
+
+        // Маршрути для фото тварин
+        Route::post('/animals/{id}/photos', [AnimalPhotoController::class, 'store']);
+        Route::delete('/photos/{id}', [AnimalPhotoController::class, 'delete']);
     });
 
     // Адмін-маршрути
@@ -71,13 +74,4 @@ Route::middleware('throttle:60,1')->group(function () {
         Route::put('/rules/{id}', [AdoptionRuleController::class, 'update']);
         Route::delete('/rules/{id}', [AdoptionRuleController::class, 'destroy']);
     });
-
-    // Маршрути для фото тварин
-    Route::post('/animals/{id}/photos', [AnimalPhotoController::class, 'store']);
-    Route::delete('/photos/{id}', [AnimalPhotoController::class, 'delete']);
-
-    // Маршрути для правил усиновлення
-    Route::get('/shelters/{shelterID}/rules', [AdoptionRuleController::class, 'show']);
-    Route::post('/shelters/{shelterID}/rules', [AdoptionRuleController::class, 'store'])->middleware('auth:sanctum');
-    Route::put('/shelters/{shelterID}/rules', [AdoptionRuleController::class, 'update'])->middleware('auth:sanctum');
 });

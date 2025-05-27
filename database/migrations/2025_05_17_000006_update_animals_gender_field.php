@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->timestamp('gmail_verified_at')->nullable()->after('gmail');
+        Schema::table('animals', function (Blueprint $table) {
+            $table->boolean('gender')->default(false)->change();
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('gmail_verified_at');
+        Schema::table('animals', function (Blueprint $table) {
+            $table->string('gender')->change();
         });
     }
-};
+}; 

@@ -14,6 +14,7 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Password as PasswordRules;
 
 class AuthController extends Controller
 {
@@ -22,20 +23,23 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'lastname' => 'required|string|max:255',
-            'phone_number' => 'required|string|max:20',
-            'gmail' => ['required', 'string', 'email', 'max:255', 'unique:users', new ValidEmailDomain],
-            'password' => 'required|string|min:8|confirmed',
+        $validated = $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users',
+            'password' => 'required|min:8|confirmed',
+            'phone' => 'required|string|max:20',
+            'city' => 'nullable|string|max:255',
         ]);
 
         $user = User::create([
-            'name' => $request->name,
-            'lastname' => $request->lastname,
-            'phone_number' => $request->phone_number,
-            'gmail' => $request->gmail,
-            'password' => Hash::make($request->password),
+            'first_name' => $validated['first_name'],
+            'last_name' => $validated['last_name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'phone' => $validated['phone'],
+            'city' => $validated['city'] ?? null,
+            'role' => 'user'
         ]);
 
         // Відправляємо лист для верифікації
@@ -45,13 +49,15 @@ class AuthController extends Controller
 
         LoggingService::logError('User registered', [
             'userID' => $user->id,
-            'email' => $user->gmail
+            'email' => $user->email
         ]);
 
         return response()->json([
-            'message' => 'Реєстрація успішна. Будь ласка, перевірте вашу електронну пошту для підтвердження.',
-            'user' => $user,
-            'token' => $token,
+            'message' => 'Реєстрація успішна',
+            'data' => [
+                'user' => $user,
+                'token' => $token
+            ]
         ], 201);
     }
 
@@ -60,39 +66,39 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-        $request->validate([
-            'gmail' => 'required|email',
+        $validated = $request->validate([
+            'email' => 'required|email',
             'password' => 'required',
         ]);
 
-        // Перевірка обмеження спроб входу
-        $throttleKey = Str::transliterate(Str::lower($request->gmail).'|'.$request->ip());
+        // Захист від брутфорсу - максимум 5 спроб
+        $throttleKey = Str::transliterate(Str::lower($validated['email']).'|'.$request->ip());
         
         if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
             $seconds = RateLimiter::availableIn($throttleKey);
             throw ValidationException::withMessages([
-                'gmail' => ["Забагато спроб входу. Спробуйте через {$seconds} секунд."],
+                'email' => ["Забагато спроб входу. Спробуйте через {$seconds} секунд."],
             ]);
         }
 
-        $user = User::where('gmail', $request->gmail)->first();
+        $user = User::where('email', $validated['email'])->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (!$user || !Hash::check($validated['password'], $user->password)) {
             RateLimiter::hit($throttleKey);
             
             LoggingService::logError('Failed login attempt', [
-                'email' => $request->gmail,
+                'email' => $validated['email'],
                 'ip' => $request->ip()
             ]);
             
             throw ValidationException::withMessages([
-                'gmail' => ['Невірні облікові дані.'],
+                'email' => ['Невірні облікові дані.'],
             ]);
         }
 
-        if (!$user->gmail_verified_at) {
+        if (!$user->email_verified_at) {
             throw ValidationException::withMessages([
-                'gmail' => ['Будь ласка, підтвердіть вашу електронну пошту.'],
+                'email' => ['Будь ласка, підтвердіть вашу електронну пошту.'],
             ]);
         }
 
@@ -101,12 +107,15 @@ class AuthController extends Controller
 
         LoggingService::logError('User logged in', [
             'userID' => $user->id,
-            'email' => $user->gmail
+            'email' => $user->email
         ]);
 
         return response()->json([
-            'user' => $user,
-            'token' => $token,
+            'message' => 'Вхід успішний',
+            'data' => [
+                'user' => $user,
+                'token' => $token
+            ]
         ]);
     }
 
@@ -121,7 +130,7 @@ class AuthController extends Controller
             'userID' => $request->user()->id
         ]);
 
-        return response()->json(['message' => 'Успішний вихід']);
+        return response()->json(['message' => 'Вихід успішний']);
     }
 
     /**
@@ -137,7 +146,7 @@ class AuthController extends Controller
      */
     public function resendVerificationEmail(Request $request)
     {
-        if ($request->user()->gmail_verified_at) {
+        if ($request->user()->email_verified_at) {
             return response()->json(['message' => 'Електронна пошта вже підтверджена.'], 400);
         }
 
@@ -156,15 +165,15 @@ class AuthController extends Controller
     public function forgotPassword(Request $request)
     {
         $request->validate([
-            'gmail' => 'required|email|exists:users,gmail'
+            'email' => 'required|email|exists:users,email'
         ]);
 
         $status = Password::sendResetLink(
-            $request->only('gmail')
+            $request->only('email')
         );
 
         LoggingService::logError('Password reset email sent', [
-            'email' => $request->gmail
+            'email' => $request->email
         ]);
 
         return $status === Password::RESET_LINK_SENT
@@ -179,12 +188,12 @@ class AuthController extends Controller
     {
         $request->validate([
             'token' => 'required',
-            'gmail' => 'required|email',
+            'email' => 'required|email',
             'password' => 'required|min:8|confirmed',
         ]);
 
         $status = Password::reset(
-            $request->only('gmail', 'password', 'password_confirmation', 'token'),
+            $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user, $password) {
                 $user->forceFill([
                     'password' => Hash::make($password)
@@ -193,7 +202,7 @@ class AuthController extends Controller
         );
 
         LoggingService::logError('Password reset', [
-            'email' => $request->gmail
+            'email' => $request->email
         ]);
 
         return $status === Password::PASSWORD_RESET
