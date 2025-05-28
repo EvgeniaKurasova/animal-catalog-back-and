@@ -17,17 +17,10 @@ class EnsureUserIsAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Перевіряємо, чи автентифікований користувач
-        if (!$request->user()) {
+        // Якщо користувач не автентифікований або не адмін
+        if (!$request->user() || !$request->user()->isAdmin) {
             return response()->json([
-                'message' => 'Необхідна автентифікація'
-            ], 401);
-        }
-
-        // Перевіряємо, чи користувач є адміністратором
-        if (!$request->user()->isAdmin) {
-            return response()->json([
-                'message' => 'Доступ заборонено. Потрібні права адміністратора.'
+                'message' => 'Доступ заборонено'
             ], 403);
         }
 

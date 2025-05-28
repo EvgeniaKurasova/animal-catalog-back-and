@@ -48,7 +48,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         LoggingService::logError('User registered', [
-            'userID' => $user->id,
+            'user_id' => $user->user_id,
             'email' => $user->email
         ]);
 
@@ -82,7 +82,10 @@ class AuthController extends Controller
         }
 
         $user = User::where('email', $validated['email'])->first();
-
+        //
+        //\Log::info('DEBUG USER', [$user]);
+        // dd($user);
+        //dd($user->getKey(), $user->getKeyName(), $user->user_id, $user->id);
         if (!$user || !Hash::check($validated['password'], $user->password)) {
             RateLimiter::hit($throttleKey);
             
@@ -106,7 +109,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         LoggingService::logError('User logged in', [
-            'userID' => $user->id,
+            'user_id' => $user->user_id,
             'email' => $user->email
         ]);
 
@@ -127,7 +130,7 @@ class AuthController extends Controller
         $request->user()->currentAccessToken()->delete();
 
         LoggingService::logError('User logged out', [
-            'userID' => $request->user()->id
+            'user_id' => $request->user()->user_id
         ]);
 
         return response()->json(['message' => 'Вихід успішний']);
@@ -153,7 +156,7 @@ class AuthController extends Controller
         $request->user()->sendEmailVerificationNotification();
 
         LoggingService::logError('Verification email resent', [
-            'userID' => $request->user()->id
+            'user_id' => $request->user()->user_id
         ]);
 
         return response()->json(['message' => 'Лист для підтвердження надіслано.']);

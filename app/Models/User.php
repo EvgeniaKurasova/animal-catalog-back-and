@@ -6,13 +6,14 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
-    protected $primaryKey = 'userID';
+    protected $primaryKey = 'user_id';
 
     /**
      * The attributes that are mass assignable.
@@ -23,11 +24,11 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'lastname',
         'phone_number',
-        'gmail',
+        'email',
         'password',
         'isAdmin',
         'code',
-        'gmail_verified_at'
+        'email_verified_at'
     ];
 
     /**
@@ -52,8 +53,21 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
+    protected $keyType = 'int';
+    public $incrementing = true;
+
     public function adoptionRequests()
     {
-        return $this->hasMany(AdoptionRequest::class, 'userID');
+        return $this->hasMany(AdoptionRequest::class, 'user_id');
+    }
+
+    public function getKeyName()
+    {
+        return 'user_id';
+    }
+
+    public function getAuthIdentifier()
+    {
+        return $this->user_id;
     }
 }

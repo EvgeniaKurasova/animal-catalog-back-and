@@ -52,7 +52,7 @@ Route::middleware('throttle:60,1')->group(function () {
     });
 
     // Адмін-маршрути
-    Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+    Route::middleware(['auth:sanctum', \App\Http\Middleware\EnsureUserIsAdmin::class])->group(function () {
         // Маршрути для управління тваринами
         Route::post('/animals', [AnimalController::class, 'store']);
         Route::put('/animals/{id}', [AnimalController::class, 'update']);

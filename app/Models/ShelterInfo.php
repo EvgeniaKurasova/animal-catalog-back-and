@@ -27,7 +27,7 @@ class ShelterInfo extends Model
         'description_en',
         'facebook',
         'instagram',
-        'rulesID'
+        'rule_id'
     ];
 
     // Поля, які мають бути приховані при серіалізації
@@ -39,6 +39,6 @@ class ShelterInfo extends Model
     // Зв'язок з правилами усиновлення
     public function rules()
     {
-        return $this->belongsTo(AdoptionRule::class, 'rulesID', 'ruleID');
+        return $this->belongsTo(AdoptionRule::class, 'rule_id', 'rule_id');
     }
 }

@@ -14,8 +14,8 @@ class AdoptionRequest extends Model
 
     // Поля, які можна масово заповнювати
     protected $fillable = [
-        'animalID',
-        'userID',
+        'animal_id',
+        'user_id',
         'first_name',
         'last_name',
         'phone',
@@ -25,8 +25,6 @@ class AdoptionRequest extends Model
         'is_processed',
         'is_archived',
         'comment',
-        'user_id',
-        'animal_id',
         'animal_name',
         'is_viewed',
         'created_at'
@@ -46,11 +44,11 @@ class AdoptionRequest extends Model
     // Зв'язок з твариною
     public function animal()
     {
-        return $this->belongsTo(Animal::class, 'animalID', 'animalID');
+        return $this->belongsTo(Animal::class, 'animal_id', 'animal_id');
     }
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'userID', 'userID');
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 }

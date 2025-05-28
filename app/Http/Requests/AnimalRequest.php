@@ -25,13 +25,13 @@ class AnimalRequest extends FormRequest
             'name_en' => 'required|string|max:255', // Ім'я тварини англійською
             'type' => 'required|string|max:255', // Вид тварини українською
             'type_en' => 'required|string|max:255', // Вид тварини англійською
-            'gender' => 'required|string|in:чоловіча,жіноча', // Стать тварини
+            'gender' => 'required|boolean', // Стать тварини
             'age_years' => 'required|integer|min:0',
             'age_months' => 'required|integer|min:0|max:11',
 
-            'is_sterilized' => 'nullable|string|max:255', // Чи стерилізована тварина
-            'size' => 'nullable|string|in:маленький,середній,великий', // Розмір тварини
-            'size_en' => 'nullable|string|in:small,medium,large', // Розмір тварини англійською
+            'is_sterilized' => 'required|string|max:255', // Чи стерилізована тварина
+            'size' => 'required|string', // Розмір тварини
+            'size_en' => 'required|string', // Розмір тварини англійською
             'additional_information' => 'nullable|string', // Додаткова інформація
             'additional_information_en' => 'nullable|string', // Додаткова інформація англійською
 
@@ -56,16 +56,11 @@ class AnimalRequest extends FormRequest
                 'type.required' => 'Please enter the animal type',
                 'type_en.required' => 'Please enter the animal type in English',
                 'gender.required' => 'Please select the animal\'s gender',
-                'gender.in' => 'Invalid gender',
                 'age_years.required' => 'Please enter the animal\'s age in years',
                 'age_years.min' => 'Age in years cannot be negative',
                 'age_months.required' => 'Please enter the animal\'s age in months',
                 'age_months.min' => 'Age in months cannot be negative',
                 'age_months.max' => 'Age in months cannot exceed 11',
-
-                // Error messages for optional fields
-                'is_sterilized.in' => 'Sterilization status must be "так" or "ні"',
-                'size.in' => 'Invalid size',
 
                 // Error messages for photos
                 'photos.*.image' => 'File must be an image',
