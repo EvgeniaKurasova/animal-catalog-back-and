@@ -28,7 +28,7 @@ class ShelterInfoRequest extends FormRequest
             'description' => 'required|text', // Опис притулку українською
             'description_en' => 'required|text', // Опис притулку англійською
             'main_photo' => 'required|string|max:255', // Головне фото для сторінки
-            'rulesID' => 'required|integer|exists:adoption_rules,ruleID', // ID правил усиновлення
+            'rules_id' => 'required|integer|exists:adoption_rules,ruleID', // ID правил усиновлення
 
             // Необов'язкові поля
             'logo' => 'nullable|string|max:255', // Логотип притулку
@@ -65,8 +65,8 @@ class ShelterInfoRequest extends FormRequest
                 'description.required' => 'Please enter the shelter description',
                 'description_en.required' => 'Please enter the shelter description in English',
                 'main_photo.required' => 'Please provide a main photo for the page',
-                'rulesID.required' => 'Please select adoption rules',
-                'rulesID.exists' => 'Selected adoption rules do not exist',
+                'rules_id.required' => 'Please select adoption rules',
+                'rules_id.exists' => 'Selected adoption rules do not exist',
 
                 // Error messages for optional fields
                 'facebook.regex' => 'Please enter a valid Facebook profile URL',
