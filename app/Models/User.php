@@ -45,6 +45,13 @@ class User extends Authenticatable implements MustVerifyEmail
      *
      * @return array<string, string>
      */
+    // public function getIdAttribute()
+    // {
+    //     return $this->attributes['user_id']; // ось
+    // }
+    
+
+
     protected function casts(): array
     {
         return [

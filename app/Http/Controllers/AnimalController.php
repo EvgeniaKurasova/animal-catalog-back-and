@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Database\Seeder;
+
 use App\Http\Requests\AnimalRequest;
 use App\Models\Animal;
 use Illuminate\Http\Request;
@@ -100,6 +102,8 @@ class AnimalController extends Controller
     // Додати нову тварину
     public function store(AnimalRequest $request)
     {
+
+        LoggingService::logError('123');
         $data = $request->validated();
         $data['age_updated_at'] = Carbon::now();
 

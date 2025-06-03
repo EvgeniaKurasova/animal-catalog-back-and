@@ -51,6 +51,10 @@ class AuthController extends Controller
             'user_id' => $user->user_id,
             'email' => $user->email
         ]);
+        // LoggingService::logError('User logged in', [
+        //     'user_id' => $user->getKey(),
+        //     'email' => $user->email
+        // ]);
 
         return response()->json([
             'message' => 'Реєстрація успішна',

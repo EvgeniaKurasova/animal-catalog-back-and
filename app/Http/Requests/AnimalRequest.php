@@ -1,96 +1,108 @@
 <?php
 
-namespace App\Http\Requests;
+    namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
+    use Illuminate\Foundation\Http\FormRequest;
 
-class AnimalRequest extends FormRequest
-{
-    /**
-     * Визначає, чи користувач має право на цей запит
-     */
-    public function authorize(): bool
+    class AnimalRequest extends FormRequest
     {
-        return true;
-    }
+        /**
+         * Determine if the user is authorized to make this request.
+         *
+         * @return bool
+         */
+        public function authorize()
+        {
+            // Перевірте, чи автентифікований користувач має право додавати/оновлювати тварину.
+            // Оскільки цей маршрут захищений middleware 'EnsureUserIsAdmin',
+            // ми можемо просто повернути true, якщо користувач вже пройшов авторизацію в middleware.
+            return true; 
+        }
 
-    /**
-     * Отримати правила валідації для запиту
-     */
-    public function rules(): array
-    {
-        return [
-
-            'name' => 'required|string|max:255', // Ім'я тварини українською
-            'name_en' => 'required|string|max:255', // Ім'я тварини англійською
-            'type' => 'required|string|max:255', // Вид тварини українською
-            'type_en' => 'required|string|max:255', // Вид тварини англійською
-            'gender' => 'required|boolean', // Стать тварини
-            'age_years' => 'required|integer|min:0',
-            'age_months' => 'required|integer|min:0|max:11',
-
-            'is_sterilized' => 'required|string|max:255', // Чи стерилізована тварина
-            'size' => 'required|string', // Розмір тварини
-            'size_en' => 'required|string', // Розмір тварини англійською
-            'additional_information' => 'nullable|string', // Додаткова інформація
-            'additional_information_en' => 'nullable|string', // Додаткова інформація англійською
-
-            // Фото тварини
-            'photos' => 'nullable|array', // Масив фото
-            'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048' // Кожне фото має бути зображенням, підтримуваних форматів, не більше 2MB на фото
-        ];
-    }
-
-    /**
-     * Отримати повідомлення про помилки валідації
-     */
-    public function messages(): array
-    {
-        $locale = app()->getLocale();
-        
-        if ($locale === 'en') {
+        /**
+         * Get the validation rules that apply to the request.
+         *
+         * @return array<string, mixed>
+         */
+        public function rules()
+        {
             return [
-                // Error messages for required fields
-                'name.required' => 'Please enter the animal\'s name',
-                'name_en.required' => 'Please enter the animal\'s name in English',
-                'type.required' => 'Please enter the animal type',
-                'type_en.required' => 'Please enter the animal type in English',
-                'gender.required' => 'Please select the animal\'s gender',
-                'age_years.required' => 'Please enter the animal\'s age in years',
-                'age_years.min' => 'Age in years cannot be negative',
-                'age_months.required' => 'Please enter the animal\'s age in months',
-                'age_months.min' => 'Age in months cannot be negative',
-                'age_months.max' => 'Age in months cannot exceed 11',
-
-                // Error messages for photos
-                'photos.*.image' => 'File must be an image',
-                'photos.*.mimes' => 'Supported formats: jpeg, png, jpg, gif',
-                'photos.*.max' => 'Each image size cannot exceed 2MB'
+                'name' => 'required|string|max:255', // Ім'я тварини українською
+                'name_en' => 'required|string|max:255', // Ім'я тварини англійською
+                'type' => 'required|string|max:255', // Вид тварини українською
+                'type_en' => 'required|string|max:255', // Вид тварини англійською
+                'gender' => 'required|boolean', // Стать тварини (очікуємо true/false або '1'/'0')
+                'age_years' => 'required|integer|min:0',
+                'age_months' => 'required|integer|min:0|max:11',
+                'is_sterilized' => 'required|string|max:255', // Чи стерилізована тварина (якщо це boolean, змініть на 'boolean')
+                'size' => 'required|string', // Розмір тварини
+                'size_en' => 'required|string', // Розмір тварини англійською
+                'additional_information' => 'nullable|string', // Додаткова інформація
+                'additional_information_en' => 'nullable|string', // Додаткова інформація англійською
+                'age_updated_at' => 'nullable|date', // Це поле буде встановлено на бекенді
+                'photos' => 'array|nullable', // Масив файлів
+                'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048', // Кожне фото має бути зображенням, підтримуваних форматів, не більше 2MB на фото
+                'photos_data' => 'array|nullable', // Масив даних про фото
+                'photos_data.*.is_main' => 'boolean', // Кожен елемент photos_data має містити is_main (boolean)
             ];
         }
 
-        return [
-            // Повідомлення про помилки для обов'язкових полів
-            'name.required' => 'Будь ласка, введіть ім\'я тварини',
-            'name_en.required' => 'Будь ласка, введіть ім\'я тварини англійською',
-            'type.required' => 'Будь ласка, введіть вид тварини',
-            'type_en.required' => 'Будь ласка, введіть вид тварини англійською',
-            'gender.required' => 'Будь ласка, виберіть стать тварини',
-            'gender.in' => 'Невірна стать тварини',
-            'age_years.required' => 'Будь ласка, введіть вік тварини в роках',
-            'age_years.min' => 'Вік в роках не може бути від\'ємним',
-            'age_months.required' => 'Будь ласка, введіть вік тварини в місяцях',
-            'age_months.min' => 'Вік в місяцях не може бути від\'ємним',
-            'age_months.max' => 'Вік в місяцях не може перевищувати 11',
+        /**
+         * Get the error messages for the defined validation rules.
+         *
+         * @return array
+         */
+        public function messages()
+        {
+            $locale = app()->getLocale();
+            
+            if ($locale === 'en') {
+                return [
+                    'name.required' => 'Please enter the animal\'s name.',
+                    'name_en.required' => 'Please enter the animal\'s name in English.',
+                    'type.required' => 'Please enter the animal type.',
+                    'type_en.required' => 'Please enter the animal type in English.',
+                    'gender.required' => 'Please select the animal\'s gender.',
+                    'gender.boolean' => 'The gender field must be true or false.',
+                    'age_years.required' => 'Please enter the animal\'s age in years.',
+                    'age_years.integer' => 'Age in years must be an integer.',
+                    'age_years.min' => 'Age in years cannot be negative.',
+                    'age_months.required' => 'Please enter the animal\'s age in months.',
+                    'age_months.integer' => 'Age in months must be an integer.',
+                    'age_months.min' => 'Age in months cannot be negative.',
+                    'age_months.max' => 'Age in months cannot exceed 11.',
+                    'is_sterilized.required' => 'Please enter the animal\'s sterilization status.',
+                    'size.required' => 'Please enter the animal\'s size.',
+                    'size_en.required' => 'Please enter the animal\'s size in English.',
+                    'photos.*.image' => 'Each file must be an image.',
+                    'photos.*.mimes' => 'Supported image formats: jpeg, png, jpg, gif.',
+                    'photos.*.max' => 'Each image size cannot exceed 2MB.',
+                    'photos_data.*.is_main.boolean' => 'The "is_main" field for photos must be true or false.',
+                ];
+            }
 
-            // Повідомлення про помилки для необов'язкових полів
-            'is_sterilized.in' => 'Статус стерилізації має бути "так" або "ні"',
-            'size.in' => 'Невірний розмір тварини',
-
-            // Повідомлення про помилки для фото
-            'photos.*.image' => 'Файл має бути зображенням',
-            'photos.*.mimes' => 'Підтримуються тільки формати: jpeg, png, jpg, gif',
-            'photos.*.max' => 'Розмір кожного зображення не може перевищувати 2MB'
-        ];
+            return [
+                'name.required' => 'Поле "Ім\'я" є обов\'язковим.',
+                'name_en.required' => 'Поле "Name" є обов\'язковим.',
+                'type.required' => 'Поле "Вид" є обов\'язковим.',
+                'type_en.required' => 'Поле "Type" є обов\'язковим.',
+                'gender.required' => 'Поле "Стать" є обов\'язковим.',
+                'gender.boolean' => 'Поле "Стать" має бути булевим (true/false).',
+                'age_years.required' => 'Поле "Кількість років" є обов\'язковим.',
+                'age_years.integer' => 'Поле "Кількість років" має бути цілим числом.',
+                'age_years.min' => 'Поле "Кількість років" не може бути від\'ємним.',
+                'age_months.required' => 'Поле "Кількість місяців" є обов\'язковим.',
+                'age_months.integer' => 'Поле "Кількість місяців" має бути цілим числом.',
+                'age_months.min' => 'Поле "Кількість місяців" не може бути від\'ємним.',
+                'age_months.max' => 'Поле "Кількість місяців" не може перевищувати 11.',
+                'is_sterilized.required' => 'Поле "Стерилізація" є обов\'язковим.',
+                'size.required' => 'Поле "Розмір" є обов\'язковим.',
+                'size_en.required' => 'Поле "Size (English)" є обов\'язковим.',
+                'photos.*.image' => 'Кожен файл має бути зображенням.',
+                'photos.*.mimes' => 'Підтримуються тільки формати: jpeg, png, jpg, gif.',
+                'photos.*.max' => 'Розмір кожного зображення не може перевищувати 2MB.',
+                'photos_data.*.is_main.boolean' => 'Поле "is_main" для фото має бути булевим (true/false).',
+            ];
+        }
     }
-} 
+    
