@@ -16,6 +16,7 @@ class Animal extends Model
 
     protected $table = 'animals'; // Вказуємо назву таблиці
     protected $appends = ['main_photo_url'];
+    protected $primaryKey = 'animal_id';
 
     protected $fillable = [
         'name',
@@ -39,12 +40,12 @@ class Animal extends Model
 
     public function photos(): HasMany
     {
-        return $this->hasMany(AnimalPhoto::class);
+        return $this->hasMany(AnimalPhoto::class, 'animal_id', 'animal_id');
     }
 
     public function mainPhoto(): HasOne
     {
-        return $this->hasOne(AnimalPhoto::class)->where('is_main', true);
+        return $this->hasOne(AnimalPhoto::class, 'animal_id', 'animal_id')->where('is_main', true);
     }
 
     /**
