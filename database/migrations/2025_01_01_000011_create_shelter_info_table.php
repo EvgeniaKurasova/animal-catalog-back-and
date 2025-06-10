@@ -21,8 +21,10 @@ return new class extends Migration
             $table->text('description');
             $table->text('description_en');
             $table->unsignedBigInteger('rule_id');
+            $table->text('short_description')->nullable();
+            $table->text('short_description_en')->nullable();
+            $table->string('about_photo')->nullable();
             $table->timestamps();
-
             $table->foreign('rule_id')->references('rule_id')->on('adoption_rules');
         });
     }

@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_tokens', function (Blueprint $table) {
-            $table->id('token_id');
-            $table->unsignedBigInteger('user_id');
-            $table->string('token');
-            $table->timestamp('expiredAt');
+        Schema::create('photos', function (Blueprint $table) {
+            $table->id('photo_id');
+            $table->unsignedBigInteger('animal_id');
+            $table->string('photo_path');
+            $table->boolean('is_main')->default(false);
             $table->timestamps();
 
-            $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
+            $table->foreign('animal_id')->references('animal_id')->on('animals')->onDelete('cascade');
         });
     }
 
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_tokens');
+        Schema::dropIfExists('photos');
     }
 };

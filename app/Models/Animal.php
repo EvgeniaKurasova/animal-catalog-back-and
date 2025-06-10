@@ -21,18 +21,17 @@ class Animal extends Model
     protected $fillable = [
         'name',
         'name_en',
-        'type',
-        'type_en',
+        'type_id',
         'gender',
-        'is_sterilized',
         'age_years',
         'age_months',
-        'size',
-        'size_en',
+        'size_id',
         'age_updated_at',
+        'sterilization',
+        'sterilization_en',
         'additional_information',
         'additional_information_en',
-    ]; // Поля, які можна масово заповнювати
+    ];
 
     protected $casts = [
         'age_updated_at' => 'datetime',

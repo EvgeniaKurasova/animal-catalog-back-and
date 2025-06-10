@@ -30,7 +30,7 @@ class UserRequest extends FormRequest
 
             // Необов'язкові поля
             'code' => 'nullable|string|max:255',
-            'gmail_verified_at' => 'nullable|date'
+            'email_verified_at' => 'nullable|date'
         ];
     }
 

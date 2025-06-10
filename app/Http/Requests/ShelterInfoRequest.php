@@ -25,13 +25,13 @@ class ShelterInfoRequest extends FormRequest
             'name_en' => 'required|string|max:255', // Назва притулку англійською
             'phone' => 'required|string|max:20', // Телефон притулку
             'email' => 'required|email|max:255', // Email притулку
-            'description' => 'required|text', // Опис притулку українською
-            'description_en' => 'required|text', // Опис притулку англійською
+            'description' => 'required|string', // Опис притулку українською
+            'description_en' => 'required|string', // Опис притулку англійською
             'main_photo' => 'required|string', // Головне фото для сторінки
-            'rules_id' => 'required|integer|exists:adoption_rules,ruleID', // ID правил усиновлення
+            'rule_id' => 'required|integer|exists:adoption_rules,rule_id', // ID правил усиновлення
 
             // Необов'язкові поля
-            'logo' => 'nullable|string', // Логотип притулку
+            'logo' => 'nullable|string',
             'facebook' => [
                 'nullable',
                 'string',
@@ -41,7 +41,10 @@ class ShelterInfoRequest extends FormRequest
                 'nullable',
                 'string',
                 'regex:/^(https?:\/\/)?(www\.)?instagram\.com\/.+/i' // Перевірка на домен instagram.com
-            ]
+            ],
+            'short_description' => 'nullable|string',
+            'short_description_en' => 'nullable|string',
+            'about_photo' => 'nullable|string',
         ];
     }
 
@@ -63,8 +66,8 @@ class ShelterInfoRequest extends FormRequest
                 'description.required' => 'Please enter the shelter description',
                 'description_en.required' => 'Please enter the shelter description in English',
                 'main_photo.required' => 'Please provide a main photo for the page',
-                'rules_id.required' => 'Please select adoption rules',
-                'rules_id.exists' => 'Selected adoption rules do not exist',
+                'rule_id.required' => 'Please select adoption rules',
+                'rule_id.exists' => 'Selected adoption rules do not exist',
 
                 // Error messages for optional fields
                 'facebook.regex' => 'Please enter a valid Facebook profile URL',
@@ -82,8 +85,8 @@ class ShelterInfoRequest extends FormRequest
             'description.required' => 'Будь ласка, введіть опис притулку',
             'description_en.required' => 'Будь ласка, введіть опис притулку англійською',
             'main_photo.required' => 'Будь ласка, вкажіть головне фото для сторінки',
-            'rulesID.required' => 'Будь ласка, виберіть правила усиновлення',
-            'rulesID.exists' => 'Вибрані правила усиновлення не існують',
+            'rule_id.required' => 'Будь ласка, виберіть правила усиновлення',
+            'rule_id.exists' => 'Вибрані правила усиновлення не існують',
 
             // Повідомлення про помилки для необов'язкових полів
             'facebook.regex' => 'Введіть коректне посилання на профіль Facebook',

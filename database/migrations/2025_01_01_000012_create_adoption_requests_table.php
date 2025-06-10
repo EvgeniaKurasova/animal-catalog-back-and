@@ -14,7 +14,10 @@ return new class extends Migration
         Schema::create('adoption_requests', function (Blueprint $table) {
             $table->id('request_id');
             $table->unsignedBigInteger('animal_id');
-            $table->unsignedBigInteger('user_id');
+            $table->string('animal_name');
+            $table->foreignId('user_id')->nullable()
+                ->constrained('users', 'user_id')
+                ->onDelete('set null');
             $table->string('first_name');
             $table->string('last_name');
             $table->string('phone');
@@ -24,10 +27,10 @@ return new class extends Migration
             $table->boolean('is_processed')->default(false);
             $table->boolean('is_archived')->default(false);
             $table->text('comment')->nullable();
+            $table->boolean('is_viewed')->default(false);
             $table->timestamps();
 
             $table->foreign('animal_id')->references('animal_id')->on('animals')->onDelete('cascade');
-            $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
         });
     }
 

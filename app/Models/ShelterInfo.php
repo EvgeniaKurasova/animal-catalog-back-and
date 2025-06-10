@@ -13,7 +13,7 @@ class ShelterInfo extends Model
     protected $table = 'shelter_info';
 
     // Первинний ключ
-    protected $primaryKey = 'shelterID';
+    protected $primaryKey = 'shelter_id';
 
     // Поля, які можна масово заповнювати
     protected $fillable = [
@@ -27,7 +27,10 @@ class ShelterInfo extends Model
         'description_en',
         'facebook',
         'instagram',
-        'rule_id'
+        'rule_id',
+        'short_description',
+        'short_description_en',
+        'about_photo',
     ];
 
     // Поля, які мають бути приховані при серіалізації

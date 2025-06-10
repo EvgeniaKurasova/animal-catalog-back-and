@@ -15,17 +15,19 @@ return new class extends Migration
             $table->id('animal_id');
             $table->string('name');
             $table->string('name_en');
-            $table->string('type');
-            $table->string('type_en');
-            $table->string('gender');
+            $table->unsignedBigInteger('type_id');
+            $table->boolean('gender')->default(false);
             $table->integer('age_years');
             $table->integer('age_months');
-            $table->string('size');
-            $table->string('size_en');
+            $table->unsignedBigInteger('size_id');
             $table->timestamp('age_updated_at');
+            $table->string('sterilization')->nullable();
+            $table->string('sterilization_en')->nullable();
             $table->text('additional_information')->nullable();
             $table->text('additional_information_en')->nullable();
             $table->timestamps();
+            $table->foreign('type_id')->references('type_id')->on('types')->onDelete('restrict');
+            $table->foreign('size_id')->references('size_id')->on('sizes')->onDelete('restrict');
         });
     }
 
@@ -36,4 +38,4 @@ return new class extends Migration
     {
         Schema::dropIfExists('animals');
     }
-};
+}; 

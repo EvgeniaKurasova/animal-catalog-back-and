@@ -11,7 +11,7 @@ class UserToken extends Model
     protected $fillable = [
         'user_id',
         'token',
-        'expiredAt',
+        // 'expiredAt',
     ];
 
     protected $hidden = [

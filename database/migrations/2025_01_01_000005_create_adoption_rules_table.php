@@ -10,9 +10,8 @@ return new class extends Migration
     {
         Schema::create('adoption_rules', function (Blueprint $table) {
             $table->id('rule_id');
-            $table->text('rules'); // Правила українською
-            $table->text('rules_en'); // Правила англійською
-            $table->integer('order')->default(0); // Для сортування правил
+            $table->text('rules');
+            $table->text('rules_en');
             $table->timestamps();
         });
     }

@@ -23,16 +23,16 @@ class AdoptionRequest extends FormRequest
             // Обов'язкові поля
             'animal_id' => 'required|exists:animals,animal_id',
             'animal_name' => 'required|exists:animals,name',
-            'user_id' => 'required|exists:users, user_id',
+            'user_id' => 'nullable|exists:users, user_id',
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
             'email' => 'required|email|max:255',
-            'message' => 'nullable|text',
+            'message' => 'nullable|string',
             'city' => 'nullable|string|max:255',
             'is_processed' => 'required|boolean',
             'is_archived' => 'required|boolean',
-            'comment' => 'nullable|text',
+            'comment' => 'nullable|string',
             'is_viewed' => 'required|boolean',
         ];
     }
@@ -46,7 +46,6 @@ class AdoptionRequest extends FormRequest
         
         if ($locale === 'en') {
             return [
-                // Error messages for required fields
                 'animal_id.required' => 'Please select an animal',
                 'animal_id.exists' => 'Selected animal does not exist',
                 'first_name.required' => 'Please enter your first name',
@@ -59,7 +58,6 @@ class AdoptionRequest extends FormRequest
         }
 
         return [
-            // Повідомлення про помилки для обов'язкових полів
             'animal_id.required' => 'Будь ласка, виберіть тварину',
             'animal_id.exists' => 'Вибрана тварина не існує',
             'first_name.required' => 'Будь ласка, введіть ваше ім\'я',

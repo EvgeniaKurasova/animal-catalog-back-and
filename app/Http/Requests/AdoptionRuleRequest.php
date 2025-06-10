@@ -21,8 +21,8 @@ class AdoptionRuleRequest extends FormRequest
     {
         return [
             // Обов'язкові поля
-            'rules' => 'required|text', // Правила українською
-            'rules_en' => 'required|text', // Правила англійською
+            'rules' => 'required|string', // Правила українською
+            'rules_en' => 'required|string', // Правила англійською
             'order' => 'required|integer|min:0' // Порядок відображення
         ];
     }
