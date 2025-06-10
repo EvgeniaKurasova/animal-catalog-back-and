@@ -27,21 +27,19 @@ class ShelterInfoRequest extends FormRequest
             'email' => 'required|email|max:255', // Email притулку
             'description' => 'required|text', // Опис притулку українською
             'description_en' => 'required|text', // Опис притулку англійською
-            'main_photo' => 'required|string|max:255', // Головне фото для сторінки
+            'main_photo' => 'required|string', // Головне фото для сторінки
             'rules_id' => 'required|integer|exists:adoption_rules,ruleID', // ID правил усиновлення
 
             // Необов'язкові поля
-            'logo' => 'nullable|string|max:255', // Логотип притулку
+            'logo' => 'nullable|string', // Логотип притулку
             'facebook' => [
                 'nullable',
                 'string',
-                'max:255',
                 'regex:/^(https?:\/\/)?(www\.)?facebook\.com\/.+/i' // Перевірка на домен facebook.com
             ],
             'instagram' => [
                 'nullable',
                 'string',
-                'max:255',
                 'regex:/^(https?:\/\/)?(www\.)?instagram\.com\/.+/i' // Перевірка на домен instagram.com
             ]
         ];

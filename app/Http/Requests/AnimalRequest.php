@@ -41,7 +41,7 @@
                 'additional_information_en' => 'nullable|string', // Додаткова інформація англійською
                 'age_updated_at' => 'nullable|date', // Це поле буде встановлено на бекенді
                 'photos' => 'array|nullable', // Масив файлів
-                'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048', // Кожне фото має бути зображенням, підтримуваних форматів, не більше 2MB на фото
+                'photos.*' => 'image|mimes:jpeg,png,jpg,gif', // Кожне фото має бути зображенням підтримуваних форматів
                 'photos_data' => 'array|nullable', // Масив даних про фото
                 'photos_data.*.is_main' => 'boolean', // Кожен елемент photos_data має містити is_main (boolean)
             ];
@@ -76,7 +76,6 @@
                     'size_en.required' => 'Please enter the animal\'s size in English.',
                     'photos.*.image' => 'Each file must be an image.',
                     'photos.*.mimes' => 'Supported image formats: jpeg, png, jpg, gif.',
-                    'photos.*.max' => 'Each image size cannot exceed 2MB.',
                     'photos_data.*.is_main.boolean' => 'The "is_main" field for photos must be true or false.',
                 ];
             }
@@ -100,7 +99,6 @@
                 'size_en.required' => 'Поле "Size (English)" є обов\'язковим.',
                 'photos.*.image' => 'Кожен файл має бути зображенням.',
                 'photos.*.mimes' => 'Підтримуються тільки формати: jpeg, png, jpg, gif.',
-                'photos.*.max' => 'Розмір кожного зображення не може перевищувати 2MB.',
                 'photos_data.*.is_main.boolean' => 'Поле "is_main" для фото має бути булевим (true/false).',
             ];
         }

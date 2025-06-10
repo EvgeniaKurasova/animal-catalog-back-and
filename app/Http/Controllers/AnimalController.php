@@ -112,7 +112,7 @@ class AnimalController extends Controller
         // Завантаження фото
         if ($request->hasFile('photos')) {
             $request->validate([
-                'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
+                'photos.*' => 'image|mimes:jpeg,png,jpg,gif'
             ]);
 
             $photosData = $request->input('photos_data', []); // масив із is_main
@@ -131,7 +131,7 @@ class AnimalController extends Controller
                 if ($isMain) $mainSet = true;
 
                 AnimalPhoto::create([
-                    'animal_id' => $animal->id,
+                    'animal_id' => $animal->animal_id,
                     'photo_path' => $path,
                     'is_main' => $isMain,
                 ]);
@@ -139,7 +139,7 @@ class AnimalController extends Controller
 
             // Якщо не було вибрано головного фото — призначити перше
             if (!$mainSet && count($files) > 0) {
-                $firstPhoto = AnimalPhoto::where('animal_id', $animal->id)->first();
+                $firstPhoto = AnimalPhoto::where('animal_id', $animal->animal_id)->first();
                 if ($firstPhoto) {
                     $firstPhoto->is_main = true;
                     $firstPhoto->save();
@@ -184,12 +184,11 @@ class AnimalController extends Controller
 
         if ($request->hasFile('photos')) {
             $request->validate([
-                'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
+                'photos.*' => 'image|mimes:jpeg,png,jpg,gif'
             ]);
 
             $photosData = $request->input('photos_data', []);
             $files = $request->file('photos');
-
             $mainSet = $animal->photos()->where('is_main', true)->exists();
 
             foreach ($files as $index => $photo) {
@@ -203,7 +202,7 @@ class AnimalController extends Controller
                 if ($isMain) $mainSet = true;
 
                 AnimalPhoto::create([
-                    'animal_id' => $animal->id,
+                    'animal_id' => $animal->animal_id,
                     'photo_path' => $path,
                     'is_main' => $isMain,
                 ]);

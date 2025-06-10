@@ -16,7 +16,7 @@ class AnimalPhotoController extends Controller
     public function upload(Request $request, $animalID)
     {
         $request->validate([
-            'photos.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'photos.*' => 'required|image|mimes:jpeg,png,jpg,gif'
         ]);
 
         $animal = Animal::findOrFail($animalID);

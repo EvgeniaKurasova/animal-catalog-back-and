@@ -43,7 +43,7 @@ class ShelterInfoController extends Controller
             'website' => 'nullable|url|max:255',
             'social_media' => 'nullable|json',
             'photos' => 'nullable|array',
-            'photos.*' => 'string|max:255'
+            'photos.*' => 'string'
         ]);
 
         if ($validator->fails()) {
@@ -73,7 +73,7 @@ class ShelterInfoController extends Controller
             'website' => 'nullable|url|max:255',
             'social_media' => 'nullable|json',
             'photos' => 'nullable|array',
-            'photos.*' => 'string|max:255'
+            'photos.*' => 'string'
         ]);
 
         if ($validator->fails()) {
