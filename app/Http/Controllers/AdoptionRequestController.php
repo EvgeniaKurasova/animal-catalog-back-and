@@ -44,8 +44,7 @@ class AdoptionRequestController extends Controller
         $animal = Animal::findOrFail($request->animal_id);
         
         $adoptionRequest = AdoptionRequest::create([
-            // Обов'язкові поля
-            'user_id' => auth()->id(),
+            'user_id' => auth()->check() ? auth()->id() : null,
             'animal_id' => $request->animal_id,
             'animal_name' => $animal->name,
             'first_name' => $request->first_name,
@@ -55,8 +54,7 @@ class AdoptionRequestController extends Controller
             'city' => $request->city,
             'message' => $request->message,
             
-            // Поля зі значеннями за замовчуванням
-            'status' => 'pending',
+            // 'status' => 'pending',
             'is_viewed' => false,
             'is_processed' => false,
             'is_archived' => false,
@@ -80,7 +78,6 @@ class AdoptionRequestController extends Controller
     public function update(Request $request, AdoptionRequest $adoptionRequest)
     {
         $adoptionRequest->update([
-            'status' => $request->status,
             'is_viewed' => true
         ]);
 

@@ -19,7 +19,7 @@ class AnimalPhotoController extends Controller
             'photos.*' => 'required|image|mimes:jpeg,png,jpg,gif'
         ]);
 
-        $animal = Animal::findOrFail($animalID);
+        $animal = Animal::findOrFail($animal_id);
 
         $uploadedPhotos = [];
 
@@ -29,7 +29,7 @@ class AnimalPhotoController extends Controller
 
                 // Додаємо запис в БД
                 $animalPhoto = AnimalPhoto::create([
-                    'animalID' => $animal->animalID,
+                    'animal_id' => $animal->animal_id,
                     'photo_path' => $path,
                     'is_main' => false // За замовчуванням фото не є головним
                 ]);
@@ -54,7 +54,7 @@ class AnimalPhotoController extends Controller
         $photo = AnimalPhoto::findOrFail($photoID);
         
         // Скидаємо всі фото цієї тварини як не головні
-        AnimalPhoto::where('animalID', $photo->animalID)
+        AnimalPhoto::where('animal_id', $photo->animal_id)
             ->update(['is_main' => false]);
         
         // Встановлюємо нове головне фото
@@ -62,7 +62,7 @@ class AnimalPhotoController extends Controller
 
         LoggingService::logError('Main photo set', [
             'photoID' => $photoID,
-            'animalID' => $photo->animalID
+            'animal_id' => $photo->animal_id
         ]);
 
         return response()->json(['message' => 'Main photo updated successfully']);
@@ -82,7 +82,7 @@ class AnimalPhotoController extends Controller
 
         LoggingService::logError('Animal photo deleted', [
             'photoID' => $photoID,
-            'animalID' => $photo->animalID
+            'animal_id' => $photo->animal_id
         ]);
 
         // Видаляємо з БД

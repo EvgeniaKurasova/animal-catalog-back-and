@@ -22,8 +22,8 @@ class AnimalController extends Controller
         $query = Animal::query();
 
         // Фільтрація за видом тварини
-        if ($request->has('type')) {
-            $query->where('type', $request->type);
+        if ($request->has('type_id')) {
+            $query->where('type_id', $request->type_id);
         }
 
         // Фільтрація за статтю
@@ -66,8 +66,8 @@ class AnimalController extends Controller
         }
 
         // Фільтрація за розміром
-        if ($request->has('size')) {
-            $query->where('size', $request->size);
+        if ($request->has('size_id')) {
+            $query->where('size_id', $request->size_id);
         }
 
         // Фільтрація за містом

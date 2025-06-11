@@ -31,27 +31,10 @@ class ShelterInfoController extends Controller
     /**
      * Створити інформацію про притулок
      */
-    public function store(Request $request)
+    public function store(ShelterInfoRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'description' => 'required|string',
-            'address' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-            'email' => 'required|email|max:255',
-            'working_hours' => 'required|string|max:255',
-            'website' => 'nullable|url|max:255',
-            'social_media' => 'nullable|json',
-            'photos' => 'nullable|array',
-            'photos.*' => 'string'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        $shelterInfo = ShelterInfo::create($request->all());
-
+        $data = $request->validated();
+        $shelterInfo = ShelterInfo::create($data);
         return response()->json([
             'message' => 'Інформацію про притулок успішно створено',
             'data' => $shelterInfo
@@ -61,28 +44,11 @@ class ShelterInfoController extends Controller
     /**
      * Оновити інформацію про притулок
      */
-    public function update(Request $request, ShelterInfo $shelterInfo)
+    public function update(ShelterInfoRequest $request, ShelterInfo $shelterInfo)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'description' => 'required|string',
-            'address' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-            'email' => 'required|email|max:255',
-            'working_hours' => 'required|string|max:255',
-            'website' => 'nullable|url|max:255',
-            'social_media' => 'nullable|json',
-            'photos' => 'nullable|array',
-            'photos.*' => 'string'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        $shelterInfo->update($request->all());
-
-            return response()->json([
+        $data = $request->validated();
+        $shelterInfo->update($data);
+        return response()->json([
             'message' => 'Інформацію про притулок успішно оновлено',
             'data' => $shelterInfo
         ]);
